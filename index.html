@@ -265,7 +265,7 @@
 
 <script>
   let db;
-  const dbReq = indexedDB.open("GymTrackerDB", 2); // Versión 2 para incluir store de sesiones de tiempo
+  const dbReq = indexedDB.open("GymTrackerDB", 2);
   dbReq.onupgradeneeded = (e) => {
     db = e.target.result;
     if (!db.objectStoreNames.contains("workouts")) {
@@ -300,10 +300,10 @@
     { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 90 },
     { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 75 },
 
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas con barra", sets: 4, reps: "6-10", rest_sec: 180 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas con barra", sets: 4, reps: "8-10", rest_sec: 150 },
     { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 150 },
     { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 120 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuadriceps", sets: 4, reps: "6-10", rest_sec: 180 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuádriceps", sets: 4, reps: "8-10", rest_sec: 90 },
     { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 90 },
 
     { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 120 },
@@ -325,7 +325,20 @@
     { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 75 }
   ];
 
-  let selectedDay = "Lunes";
+  // FUNCIÓN PARA DETECTAR EL DÍA ACTUAL
+  function getTodayName() {
+    const dayIndex = new Date().getDay(); // 0 = Domingo, 1 = Lunes, ..., 4 = Jueves, ..., 6 = Sábado
+    const dayMap = {
+      1: "Lunes",
+      2: "Martes",
+      3: "Miércoles",
+      4: "Jueves",
+      5: "Viernes"
+    };
+    return dayMap[dayIndex] || "Lunes"; // Si es Fin de Semana (Sábado/Domingo), muestra Lunes por defecto
+  }
+
+  let selectedDay = getTodayName(); // Asigna el día actual automáticamente
   let workoutActive = false;
   let workoutSeconds = 0;
   let workoutInterval = null;
@@ -483,21 +496,18 @@
         return;
       }
 
-      // Agrupar ejercicios por fecha
       const grouped = {};
       records.forEach(r => {
         if (!grouped[r.date]) grouped[r.date] = [];
         grouped[r.date].push(r);
       });
 
-      // Agrupar tiempo total por fecha
       const dayTimeTotals = {};
       sessionRecords.forEach(s => {
         if (!dayTimeTotals[s.date]) dayTimeTotals[s.date] = 0;
         dayTimeTotals[s.date] += s.durationSeconds;
       });
 
-      // Combinar todas las fechas disponibles
       const allDates = Array.from(new Set([...Object.keys(grouped), ...Object.keys(dayTimeTotals)]))
                              .sort((a,b) => b.localeCompare(a));
       
@@ -555,10 +565,8 @@
       btnWorkout.classList.remove('active');
       clearInterval(workoutInterval);
 
-      // Detener y resetear el temporizador de descanso
       stopRestTimer();
 
-      // Guardar tiempo de la sesión en IndexedDB
       if (workoutSeconds > 0 && db) {
         const today = new Date().toISOString().split('T')[0];
         const tx = db.transaction("sessions", "readwrite");
@@ -569,7 +577,6 @@
         });
       }
 
-      // Reiniciar visor de tiempo
       document.getElementById('workout-timer').textContent = "00:00:00";
     }
   };
@@ -604,7 +611,17 @@
     document.getElementById('rest-timer').textContent = `${m}:${s}`;
   }
 
-  // EVENTOS Y SERVICE WORKER (Al final, cuando las funciones ya existen)
+  // EVENTOS PARA App Shortcuts Y SERVICE WORKER
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab === 'history') {
+      switchTab('history');
+    } else if (tab === 'routine') {
+      switchTab('routine');
+    }
+  });
+
   document.getElementById('btn-add-30').onclick = () => { restSecondsLeft += 30; updateRestDisplay(); };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
 
