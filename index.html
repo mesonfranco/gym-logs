@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Gym Tracker - Con Historial Local</title>
+  <meta name="theme-color" content="#121214">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #121214;
+      color: #e1e1e6;
+      padding: 16px;
+      padding-bottom: 110px;
+      max-width: 500px;
+      margin: 0 auto;
+      user-select: none;
+    }
+    header {
+      background: #1e1e24;
+      padding: 16px;
+      border-radius: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #29292e;
+    }
+    .timer-title { font-size: 11px; text-transform: uppercase; color: #a8a8b3; font-weight: 700; }
+    .timer-display { font-size: 24px; font-weight: 800; color: #00b37e; font-variant-numeric: tabular-nums; }
+    .btn-workout {
+      background: #00b37e;
+      color: #fff;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-workout.active { background: #f75a68; }
+
+    /* Nav Tabs Main */
+    .tab-nav {
+      display: flex;
+      background: #1e1e24;
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 16px;
+      border: 1px solid #29292e;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      background: transparent;
+      border: none;
+      color: #a8a8b3;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #00b37e;
+      color: #fff;
+    }
+
+    /* Selector de días */
+    .day-selector {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+      scrollbar-width: none;
+    }
+    .day-selector::-webkit-scrollbar { display: none; }
+    .day-btn {
+      background: #202024;
+      color: #a8a8b3;
+      border: 1px solid #29292e;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .day-btn.active {
+      background: #29292e;
+      color: #00b37e;
+      border-color: #00b37e;
+    }
+
+    /* Cards Ejercicio */
+    .card {
+      background: #202024;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #29292e;
+    }
+    .card-header { margin-bottom: 12px; }
+    .exercise-title { font-size: 16px; font-weight: 700; color: #fff; }
+    .exercise-subtitle { font-size: 12px; color: #00b37e; font-weight: 600; margin-top: 2px; }
+    .last-performance {
+      font-size: 11px;
+      color: #a8a8b3;
+      background: #121214;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-top: 6px;
+      display: inline-block;
+    }
+
+    .set-labels {
+      display: grid;
+      grid-template-columns: 36px 1fr 1fr 44px;
+      gap: 8px;
+      margin-bottom: 6px;
+      font-size: 11px;
+      color: #7c7c8a;
+      font-weight: 700;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .set-row {
+      display: grid;
+      grid-template-columns: 36px 1fr 1fr 44px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .set-num { font-size: 13px; font-weight: 700; color: #a8a8b3; text-align: center; }
+    .input-field {
+      background: #121214;
+      border: 1px solid #29292e;
+      color: #fff;
+      padding: 10px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      width: 100%;
+      outline: none;
+    }
+    .input-field:focus { border-color: #00b37e; }
+    .btn-check {
+      background: #29292e;
+      border: none;
+      color: #a8a8b3;
+      border-radius: 8px;
+      height: 38px;
+      cursor: pointer;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-check.done { background: #00b37e; color: #fff; }
+
+    /* Barra Rest */
+    .rest-bar {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 468px;
+      background: #f75a68;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 24px rgba(247, 90, 104, 0.3);
+      z-index: 100;
+    }
+    .rest-bar.hidden { display: none; }
+    .rest-time { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .btn-rest-ctrl {
+      background: rgba(255,255,255,0.25);
+      border: none;
+      color: #fff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    /* Historial Styles */
+    .history-item {
+      background: #202024;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      border: 1px solid #29292e;
+    }
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .history-date { font-size: 14px; font-weight: 800; color: #00b37e; }
+    .history-total-time { font-size: 12px; font-weight: 700; color: #00b37e; background: #121214; padding: 4px 8px; border-radius: 6px; }
+    .history-day { font-size: 12px; color: #a8a8b3; margin-bottom: 8px; }
+    .history-ex-list { font-size: 13px; color: #e1e1e6; line-height: 1.5; }
+    .hidden-view { display: none; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <div class="timer-title">Tiempo de Entrenamiento</div>
+      <div class="timer-display" id="workout-timer">00:00:00</div>
+    </div>
+    <button class="btn-workout" id="btn-toggle-workout">Iniciar Sesión</button>
+  </header>
+
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-routine-btn" onclick="switchTab('routine')">Rutina</button>
+    <button class="tab-btn" id="tab-history-btn" onclick="switchTab('history')">Historial</button>
+  </div>
+
+  <!-- Vista Rutina -->
+  <div id="view-routine">
+    <div class="day-selector" id="day-selector"></div>
+    <div id="exercise-list"></div>
+  </div>
+
+  <!-- Vista Historial -->
+  <div id="view-history" class="hidden-view">
+    <div id="history-container">
+      <div style="text-align: center; color: #a8a8b3; padding: 20px;">Cargando historial...</div>
+    </div>
+  </div>
+
+  <div class="rest-bar hidden" id="rest-bar">
+    <div>
+      <div style="font-size: 10px; text-transform: uppercase; font-weight: 700;">Descanso</div>
+      <div class="rest-time" id="rest-timer">00:00</div>
+    </div>
+    <div>
+      <button class="btn-rest-ctrl" id="btn-add-30">+30s</button>
+      <button class="btn-rest-ctrl" id="btn-skip-rest">Saltar</button>
+    </div>
+  </div>
+
+<script>
+  let db;
+  const dbReq = indexedDB.open("GymTrackerDB", 2); // Versión 2 para incluir store de sesiones de tiempo
+  dbReq.onupgradeneeded = (e) => {
+    db = e.target.result;
+    if (!db.objectStoreNames.contains("workouts")) {
+      const store = db.createObjectStore("workouts", { keyPath: "id", autoIncrement: true });
+      store.createIndex("date", "date", { unique: false });
+      store.createIndex("exercise", "exercise", { unique: false });
+    }
+    if (!db.objectStoreNames.contains("sessions")) {
+      const sessionStore = db.createObjectStore("sessions", { keyPath: "id", autoIncrement: true });
+      sessionStore.createIndex("date", "date", { unique: false });
+    }
+  };
+  dbReq.onsuccess = (e) => {
+    db = e.target.result;
+    renderExercises();
+  };
+
+  const DB_ROUTINE = [
+    { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 150 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Press inclinado con mancuernas", sets: 3, reps: "8-10", rest_sec: 120 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Press convergente en máquina", sets: 3, reps: "10-12", rest_sec: 90 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Aperturas en polea", sets: 2, reps: "12-15", rest_sec: 60 },
+    { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 75 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 2, reps: "12-15", rest_sec: 75 },
+    
+    { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "6-10", rest_sec: 150 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 4, reps: "8-10", rest_sec: 150 },
+    { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 90 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo Hammer con apoyo", sets: 3, reps: "10-12", rest_sec: 90 },
+    { day: "Martes", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 90 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 75 },
+
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Hack Squat", sets: 4, reps: "6-10", rest_sec: 150 },
+    { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 150 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 120 },
+    { day: "Miércoles", muscle: "Femorales", exercise: "Curl femoral sentado", sets: 3, reps: "10-15", rest_sec: 90 },
+    { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 90 },
+    { day: "Miércoles", muscle: "Core", exercise: "Crunch en polea", sets: 3, reps: "12-20", rest_sec: 60 },
+
+    { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Remo sentado en polea", sets: 3, reps: "10-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Deltoide lateral", exercise: "Elevaciones laterales con mancuernas", sets: 4, reps: "15-25", rest_sec: 60 },
+    { day: "Jueves", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
+    { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Jueves", muscle: "Tríceps", exercise: "Tríceps cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
+
+    { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 120 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 75 },
+    { day: "Viernes", muscle: "Deltoide lateral", exercise: "Elevación lateral en máquina", sets: 4, reps: "15-25", rest_sec: 60 },
+    { day: "Viernes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 60 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl Bayesian", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl martillo", sets: 2, reps: "12-15", rest_sec: 75 },
+    { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 75 }
+  ];
+
+  let selectedDay = "Lunes";
+  let workoutActive = false;
+  let workoutSeconds = 0;
+  let workoutInterval = null;
+  let restSecondsLeft = 0;
+  let restInterval = null;
+
+  const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+  const daySelector = document.getElementById('day-selector');
+  days.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = `day-btn ${d === selectedDay ? 'active' : ''}`;
+    btn.textContent = d;
+    btn.onclick = () => {
+      selectedDay = d;
+      document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderExercises();
+    };
+    daySelector.appendChild(btn);
+  });
+
+  function switchTab(tab) {
+    document.getElementById('tab-routine-btn').classList.toggle('active', tab === 'routine');
+    document.getElementById('tab-history-btn').classList.toggle('active', tab === 'history');
+    document.getElementById('view-routine').classList.toggle('hidden-view', tab !== 'routine');
+    document.getElementById('view-history').classList.toggle('hidden-view', tab !== 'history');
+    if (tab === 'history') loadHistory();
+  }
+
+  function renderExercises() {
+    const list = document.getElementById('exercise-list');
+    list.innerHTML = '';
+    const exercises = DB_ROUTINE.filter(e => e.day === selectedDay);
+
+    exercises.forEach((ex, exIdx) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      
+      let setsHTML = `
+        <div class="set-labels">
+          <span>Serie</span>
+          <span>Kg</span>
+          <span>Reps</span>
+          <span>Done</span>
+        </div>
+      `;
+      for (let i = 1; i <= ex.sets; i++) {
+        setsHTML += `
+          <div class="set-row">
+            <span class="set-num">${i}</span>
+            <input type="number" step="0.5" placeholder="kg" class="input-field" id="input_w_${exIdx}_${i}">
+            <input type="number" placeholder="${ex.reps}" class="input-field" id="input_r_${exIdx}_${i}">
+            <button class="btn-check" id="btn_c_${exIdx}_${i}" onclick="saveSetRecord('${ex.exercise}', ${i}, '${exIdx}_${i}', ${ex.rest_sec})">✓</button>
+          </div>
+        `;
+      }
+
+      card.innerHTML = `
+        <div class="card-header">
+          <div class="exercise-title">${ex.exercise}</div>
+          <div class="exercise-subtitle">${ex.muscle} • ${ex.sets} series x ${ex.reps} reps</div>
+          <div class="last-performance" id="last_perf_${exIdx}">Cargando récord previo...</div>
+        </div>
+        ${setsHTML}
+      `;
+      list.appendChild(card);
+      fetchLastPerformance(ex.exercise, `last_perf_${exIdx}`);
+    });
+  }
+
+  function saveSetRecord(exerciseName, setNum, inputIdSuffix, restSec) {
+    const w = document.getElementById(`input_w_${inputIdSuffix}`).value;
+    const r = document.getElementById(`input_r_${inputIdSuffix}`).value;
+    const btn = document.getElementById(`btn_c_${inputIdSuffix}`);
+    
+    btn.classList.toggle('done');
+    
+    if (w || r) {
+      const today = new Date().toISOString().split('T')[0];
+      const record = {
+        date: today,
+        day: selectedDay,
+        exercise: exerciseName,
+        set: setNum,
+        weight: w || 0,
+        reps: r || 0,
+        timestamp: Date.now()
+      };
+      
+      const tx = db.transaction("workouts", "readwrite");
+      tx.objectStore("workouts").add(record);
+    }
+
+    if (btn.classList.contains('done')) {
+      startRestTimer(restSec);
+    }
+  }
+
+  function fetchLastPerformance(exerciseName, elementId) {
+    if (!db) return;
+    const tx = db.transaction("workouts", "readonly");
+    const store = tx.objectStore("workouts");
+    const index = store.index("exercise");
+    const req = index.getAll(exerciseName);
+
+    req.onsuccess = () => {
+      const res = req.result;
+      const el = document.getElementById(elementId);
+      if (res && res.length > 0) {
+        res.sort((a,b) => b.timestamp - a.timestamp);
+        const last = res[0];
+        el.textContent = `Última vez (${last.date}): ${last.weight}kg × ${last.reps} reps`;
+      } else {
+        el.textContent = `Sin registros previos`;
+      }
+    };
+  }
+
+  function formatDuration(totalSeconds) {
+    const h = Math.floor(totalSeconds / 3600);
+    const m = Math.floor((totalSeconds % 3600) / 60);
+    const s = totalSeconds % 60;
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
+  }
+
+  function loadHistory() {
+    const container = document.getElementById('history-container');
+    if (!db) return;
+    
+    const tx = db.transaction(["workouts", "sessions"], "readonly");
+    const storeWorkouts = tx.objectStore("workouts");
+    const storeSessions = tx.objectStore("sessions");
+
+    const reqWorkouts = storeWorkouts.getAll();
+    const reqSessions = storeSessions.getAll();
+
+    let records = [];
+    let sessionRecords = [];
+
+    reqWorkouts.onsuccess = () => {
+      records = reqWorkouts.result;
+      if (reqSessions.readyState === 'done') processHistoryData();
+    };
+
+    reqSessions.onsuccess = () => {
+      sessionRecords = reqSessions.result;
+      if (reqWorkouts.readyState === 'done') processHistoryData();
+    };
+
+    function processHistoryData() {
+      if ((!records || records.length === 0) && (!sessionRecords || sessionRecords.length === 0)) {
+        container.innerHTML = `<div style="text-align: center; color: #a8a8b3; padding: 20px;">Aún no tienes registros guardados.</div>`;
+        return;
+      }
+
+      // Agrupar ejercicios por fecha
+      const grouped = {};
+      records.forEach(r => {
+        if (!grouped[r.date]) grouped[r.date] = [];
+        grouped[r.date].push(r);
+      });
+
+      // Agrupar tiempo total por fecha
+      const dayTimeTotals = {};
+      sessionRecords.forEach(s => {
+        if (!dayTimeTotals[s.date]) dayTimeTotals[s.date] = 0;
+        dayTimeTotals[s.date] += s.durationSeconds;
+      });
+
+      // Combinar todas las fechas disponibles
+      const allDates = Array.from(new Set([...Object.keys(grouped), ...Object.keys(dayTimeTotals)]))
+                           .sort((a,b) => b.localeCompare(a));
+      
+      let html = '';
+      allDates.forEach(d => {
+        const items = grouped[d] || [];
+        const totalSecs = dayTimeTotals[d] || 0;
+        
+        let exSummary = {};
+        items.forEach(i => {
+          if (!exSummary[i.exercise]) exSummary[i.exercise] = [];
+          exSummary[i.exercise].push(`S${i.set}: ${i.weight}kg×${i.reps}`);
+        });
+
+        let summaryText = '';
+        for (let ex in exSummary) {
+          summaryText += `<div><strong>${ex}:</strong> ${exSummary[ex].join(', ')}</div>`;
+        }
+        if (!summaryText) summaryText = `<div style="color: #7c7c8a; font-style: italic;">Sesión de tiempo registrada sin series guardadas.</div>`;
+
+        const dayName = items.length > 0 ? items[0].day : '';
+        const totalFormatted = totalSecs > 0 ? formatDuration(totalSecs) : '0s';
+
+        html += `
+          <div class="history-item">
+            <div class="history-header">
+              <div class="history-date">${d}</div>
+              <div class="history-total-time">Total: ${totalFormatted}</div>
+            </div>
+            ${dayName ? `<div class="history-day">${dayName}</div>` : ''}
+            <div class="history-ex-list">${summaryText}</div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+  }
+
+  const btnWorkout = document.getElementById('btn-toggle-workout');
+  btnWorkout.onclick = () => {
+    workoutActive = !workoutActive;
+    if (workoutActive) {
+      btnWorkout.textContent = 'Finalizar';
+      btnWorkout.classList.add('active');
+      workoutSeconds = 0;
+      workoutInterval = setInterval(() => {
+        workoutSeconds++;
+        const h = String(Math.floor(workoutSeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((workoutSeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(workoutSeconds % 60).padStart(2, '0');
+        document.getElementById('workout-timer').textContent = `${h}:${m}:${s}`;
+      }, 1000);
+    } else {
+      btnWorkout.textContent = 'Iniciar Sesión';
+      btnWorkout.classList.remove('active');
+      clearInterval(workoutInterval);
+
+      // Detener y resetear el temporizador de descanso
+      stopRestTimer();
+
+      // Guardar tiempo de la sesión en IndexedDB
+      if (workoutSeconds > 0 && db) {
+        const today = new Date().toISOString().split('T')[0];
+        const tx = db.transaction("sessions", "readwrite");
+        tx.objectStore("sessions").add({
+          date: today,
+          durationSeconds: workoutSeconds,
+          timestamp: Date.now()
+        });
+      }
+
+      // Reiniciar visor de tiempo
+      document.getElementById('workout-timer').textContent = "00:00:00";
+    }
+  };
+
+  function startRestTimer(seconds) {
+    clearInterval(restInterval);
+    restSecondsLeft = seconds;
+    const bar = document.getElementById('rest-bar');
+    bar.classList.remove('hidden');
+    updateRestDisplay();
+
+    restInterval = setInterval(() => {
+      restSecondsLeft--;
+      if (restSecondsLeft <= 0) {
+        stopRestTimer();
+        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+      } else {
+        updateRestDisplay();
+      }
+    }, 1000);
+  }
+
+  function stopRestTimer() {
+    clearInterval(restInterval);
+    restSecondsLeft = 0;
+    document.getElementById('rest-bar').classList.add('hidden');
+  }
+
+  function updateRestDisplay() {
+    const m = String(Math.floor(restSecondsLeft / 60)).padStart(2, '0');
+    const s = String(restSecondsLeft % 60).padStart(2, '0');
+    document.getElementById('rest-timer').textContent = `${m}:${s}`;
+  }
+
+  document.getElementById('btn-add-30').onclick = () => { restSecondsLeft += 30; updateRestDisplay(); };
+  document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
+</script>
+</body>
+</html>
