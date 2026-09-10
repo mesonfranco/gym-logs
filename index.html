@@ -26,6 +26,7 @@
       max-width: 500px;
       margin: 0 auto;
       user-select: none;
+      overscroll-behavior-y: contain;
     }
     header {
       background: #1e1e24;
@@ -284,45 +285,45 @@
   };
 
   const DB_ROUTINE = [
-    { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 150 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Press inclinado con mancuernas", sets: 3, reps: "8-10", rest_sec: 120 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Press convergente en máquina", sets: 3, reps: "10-12", rest_sec: 90 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Aperturas en polea", sets: 2, reps: "12-15", rest_sec: 60 },
-    { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 75 },
-    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
-    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 2, reps: "12-15", rest_sec: 75 },
-    
-    { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "6-10", rest_sec: 150 },
-    { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 4, reps: "8-10", rest_sec: 150 },
-    { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 90 },
-    { day: "Martes", muscle: "Espalda", exercise: "Remo Hammer con apoyo", sets: 3, reps: "10-12", rest_sec: 90 },
-    { day: "Martes", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
-    { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 90 },
-    { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 240 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Press inclinado con mancuernas", sets: 3, reps: "8-10", rest_sec: 240 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Press convergente en máquina", sets: 3, reps: "10-12", rest_sec: 240 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Aperturas en polea", sets: 2, reps: "12-15", rest_sec: 240 },
+    { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 240 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 240 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 2, reps: "12-15", rest_sec: 240 },
 
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas con barra", sets: 4, reps: "8-10", rest_sec: 150 },
-    { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 150 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 120 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuádriceps", sets: 4, reps: "8-10", rest_sec: 90 },
-    { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 90 },
+    { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "6-10", rest_sec: 240 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 4, reps: "8-10", rest_sec: 240 },
+    { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 240 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo Hammer con apoyo", sets: 3, reps: "10-12", rest_sec: 240 },
+    { day: "Martes", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 240 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 240 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 240 },
 
-    { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Espalda", exercise: "Remo sentado en polea", sets: 3, reps: "10-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Deltoide lateral", exercise: "Elevaciones laterales con mancuernas", sets: 4, reps: "15-25", rest_sec: 60 },
-    { day: "Jueves", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
-    { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado", sets: 3, reps: "10-15", rest_sec: 75 },
-    { day: "Jueves", muscle: "Tríceps", exercise: "Tríceps cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas con barra", sets: 4, reps: "8-10", rest_sec: 240 },
+    { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 240 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 240 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuádriceps", sets: 4, reps: "8-10", rest_sec: 240 },
+    { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 240 },
 
-    { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 120 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 75 },
-    { day: "Viernes", muscle: "Deltoide lateral", exercise: "Elevación lateral en máquina", sets: 4, reps: "15-25", rest_sec: 60 },
-    { day: "Viernes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 60 },
-    { day: "Viernes", muscle: "Bíceps", exercise: "Curl Bayesian", sets: 3, reps: "10-15", rest_sec: 75 },
-    { day: "Viernes", muscle: "Bíceps", exercise: "Curl martillo", sets: 2, reps: "12-15", rest_sec: 75 },
-    { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 75 }
+    { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 240 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 240 },
+    { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-12", rest_sec: 240 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Remo sentado en polea", sets: 3, reps: "10-12", rest_sec: 240 },
+    { day: "Jueves", muscle: "Deltoide lateral", exercise: "Elevaciones laterales con mancuernas", sets: 4, reps: "15-25", rest_sec: 240 },
+    { day: "Jueves", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 240 },
+    { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado", sets: 3, reps: "10-15", rest_sec: 240 },
+    { day: "Jueves", muscle: "Tríceps", exercise: "Tríceps cuerda", sets: 3, reps: "10-15", rest_sec: 240 },
+
+    { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 240 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 240 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 240 },
+    { day: "Viernes", muscle: "Deltoide lateral", exercise: "Elevación lateral en máquina", sets: 4, reps: "15-25", rest_sec: 240 },
+    { day: "Viernes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 240 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl Bayesian", sets: 3, reps: "10-15", rest_sec: 240 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl martillo", sets: 2, reps: "12-15", rest_sec: 240 },
+    { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 240 }
   ];
 
   // FUNCIÓN PARA DETECTAR EL DÍA ACTUAL
