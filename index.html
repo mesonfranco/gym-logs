@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <!-- Enlace al Manifest y al Ícono -->
   <link rel="manifest" href="/manifest.json">
-  <!-- Reemplaza las líneas del ícono anteriores por estas -->
   <link rel="icon" type="image/png" sizes="192x192" href="/icon.png">
   <link rel="apple-touch-icon" href="/icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -499,7 +498,7 @@
 
       // Combinar todas las fechas disponibles
       const allDates = Array.from(new Set([...Object.keys(grouped), ...Object.keys(dayTimeTotals)]))
-                           .sort((a,b) => b.localeCompare(a));
+                             .sort((a,b) => b.localeCompare(a));
       
       let html = '';
       allDates.forEach(d => {
@@ -604,9 +603,10 @@
     document.getElementById('rest-timer').textContent = `${m}:${s}`;
   }
 
+  // EVENTOS Y SERVICE WORKER (Al final, cuando las funciones ya existen)
   document.getElementById('btn-add-30').onclick = () => { restSecondsLeft += 30; updateRestDisplay(); };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
-  // Registramos el Service Worker
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
       .catch(err => console.log('SW error:', err));
