@@ -606,7 +606,6 @@
 
   document.getElementById('btn-add-30').onclick = () => { restSecondsLeft += 30; updateRestDisplay(); };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
-  <script>
   // Registramos el Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
