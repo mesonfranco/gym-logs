@@ -1062,24 +1062,52 @@
   };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
 
-  // DETECCIÓN DE NUEVA VERSIÓN PWA
+  // DETECCIÓN DE NUEVA VERSIÓN PWA (ACTUALIZADA)
   if ('serviceWorker' in navigator) {
-    let newWorker;
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      reg.addEventListener('updatefound', () => {
-        newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            document.getElementById('update-banner').classList.remove('hidden');
+    let refreshing = false;
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
+
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').then(registration => {
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            registration.update();
           }
         });
-      });
-    }).catch(err => console.log('SW error:', err));
 
-    document.getElementById('btn-reload-app').onclick = () => {
-      if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
-      window.location.reload();
-    };
+        if (registration.waiting) {
+          showUpdateBanner(registration.waiting);
+        }
+
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              showUpdateBanner(newWorker);
+            }
+          });
+        });
+      });
+    });
+
+    function showUpdateBanner(worker) {
+      const banner = document.getElementById('update-banner');
+      const btn = document.getElementById('btn-reload-app');
+      
+      if (banner && btn) {
+        banner.classList.remove('hidden');
+        btn.onclick = () => {
+          worker.postMessage({ action: 'skipWaiting' });
+        };
+      }
+    }
   }
 </script>
 </body>
