@@ -27,7 +27,6 @@
       user-select: none;
       transition: padding-bottom 0.3s ease;
     }
-    /* Espaciado extra cuando el timer flotante está activo */
     body.rest-active {
       padding-bottom: 160px;
     }
@@ -216,13 +215,13 @@
     }
     .btn-check.done { background: #386a20; color: #b5f296; }
 
-    /* Historial Rediseñado */
+    /* Historial + Gestos de Descarte */
     .swipe-container { position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 12px; }
     .swipe-bg {
       position: absolute; top: 0; right: 0; bottom: 0; left: 0;
       background: #8c1d18; color: #f2b8b5;
       display: flex; align-items: center; justify-content: flex-end;
-      padding-right: 20px; border-radius: 16px;
+      padding-right: 20px; border-radius: 16px; cursor: pointer;
     }
     .swipe-content {
       position: relative; background: #1b1b21; border: 1px solid #2b2b32;
@@ -293,10 +292,6 @@
     .btn-submit {
       width: 100%; background: #a8c7fa; color: #042e6f; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 8px;
     }
-    .metric-value { font-size: 28px; font-weight: 700; color: #a8c7fa; margin-top: 4px; }
-    .metric-label { font-size: 11px; color: #90909a; font-weight: 700; text-transform: uppercase; }
-    .pr-chip { background: #386a20; color: #b5f296; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
-    .weight-history-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2b2b32; font-size: 13px; }
     .empty-state { text-align: center; padding: 40px 20px; background: #1b1b21; border-radius: 16px; border: 1px dashed #45464f; }
     .empty-state-icon { font-size: 48px; color: #004a77; margin-bottom: 12px; }
     .empty-state-title { font-size: 15px; font-weight: 700; color: #e2e2e9; margin-bottom: 6px; }
@@ -326,31 +321,6 @@
   <!-- Vista Historial -->
   <div id="view-history" class="hidden-view">
     <div id="history-container"></div>
-  </div>
-
-  <!-- Vista Progreso -->
-  <div id="view-progress" class="hidden-view">
-    <div class="card">
-      <div class="metric-label">Promedio Semanal (Últimas 4 semanas)</div>
-      <div class="metric-value" id="weekly-avg-display">0m / sem</div>
-      <div style="font-size: 12px; color: #90909a; margin-top: 4px;" id="total-time-month">Total del mes: 0 min</div>
-    </div>
-
-    <div class="card">
-      <div class="exercise-title" style="margin-bottom: 12px;">Evolución de Pesos</div>
-      <div class="form-group">
-        <label>Selecciona Ejercicio</label>
-        <select id="progress-ex-select" class="form-control" onchange="renderExerciseProgress()"></select>
-      </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 8px 0;">
-        <div class="metric-label">Máximo Histórico (PR)</div>
-        <div class="pr-chip" id="pr-weight-display">0 kg</div>
-      </div>
-
-      <div class="metric-label" style="margin-top: 16px; margin-bottom: 8px;">Historial de Cargas</div>
-      <div id="weight-history-list"></div>
-    </div>
   </div>
 
   <!-- Vista Agregar Ejercicio -->
@@ -413,10 +383,6 @@
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">history</span></div>
       <span>Historial</span>
     </button>
-    <button class="nav-item" id="tab-progress-btn" onclick="switchTab('progress')">
-      <div class="nav-icon-wrapper"><span class="material-symbols-outlined">analytics</span></div>
-      <span>Progreso</span>
-    </button>
     <button class="nav-item" id="tab-add-btn" onclick="switchTab('add')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">add_circle</span></div>
       <span>Añadir</span>
@@ -429,45 +395,13 @@
   dbReq.onsuccess = (e) => {
     db = e.target.result;
     renderExercises();
-    populateProgressSelect();
   };
 
   const DEFAULT_ROUTINE = [
     { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 150 },
     { day: "Lunes", muscle: "Pecho", exercise: "Press inclinado con mancuernas", sets: 3, reps: "8-10", rest_sec: 120 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Press convergente en máquina", sets: 3, reps: "10-12", rest_sec: 90 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Aperturas en polea", sets: 2, reps: "12-15", rest_sec: 60 },
-    { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 75 },
-    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
-    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 2, reps: "12-15", rest_sec: 75 },
-    { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "6-10", rest_sec: 150 },
-    { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 4, reps: "8-10", rest_sec: 150 },
-    { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 90 },
-    { day: "Martes", muscle: "Espalda", exercise: "Remo Hammer con apoyo", sets: 3, reps: "10-12", rest_sec: 90 },
-    { day: "Martes", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
-    { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 90 },
-    { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 75 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas", sets: 4, reps: "8-10", rest_sec: 150 },
-    { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 150 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 120 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuádriceps", sets: 4, reps: "8-10", rest_sec: 90 },
-    { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 90 },
-    { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Espalda", exercise: "Remo sentado en polea", sets: 3, reps: "10-12", rest_sec: 120 },
-    { day: "Jueves", muscle: "Deltoide lateral", exercise: "Elevaciones laterales con mancuernas", sets: 4, reps: "15-25", rest_sec: 60 },
-    { day: "Jueves", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
-    { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado", sets: 3, reps: "10-15", rest_sec: 75 },
-    { day: "Jueves", muscle: "Tríceps", exercise: "Tríceps cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
     { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 120 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 75 },
-    { day: "Viernes", muscle: "Deltoide lateral", exercise: "Elevación lateral en máquina", sets: 4, reps: "15-25", rest_sec: 60 },
-    { day: "Viernes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 60 },
-    { day: "Viernes", muscle: "Bíceps", exercise: "Curl Bayesian", sets: 3, reps: "10-15", rest_sec: 75 },
-    { day: "Viernes", muscle: "Bíceps", exercise: "Curl martillo", sets: 2, reps: "12-15", rest_sec: 75 },
-    { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 75 }
+    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 }
   ];
 
   let DB_ROUTINE = JSON.parse(localStorage.getItem('custom_routine')) || DEFAULT_ROUTINE;
@@ -479,11 +413,6 @@
   }
 
   let selectedDay = getTodayName();
-  let workoutActive = localStorage.getItem('workout_active') === 'true';
-  let workoutStartTime = parseInt(localStorage.getItem('workout_start_time')) || null;
-  let workoutSeconds = 0;
-  let workoutInterval = null;
-
   let restTotalDuration = 0;
   let restEndTime = null;
   let restSecondsLeft = 0;
@@ -509,16 +438,13 @@
   function switchTab(tab) {
     document.getElementById('tab-routine-btn').classList.toggle('active', tab === 'routine');
     document.getElementById('tab-history-btn').classList.toggle('active', tab === 'history');
-    document.getElementById('tab-progress-btn').classList.toggle('active', tab === 'progress');
     document.getElementById('tab-add-btn').classList.toggle('active', tab === 'add');
     
     document.getElementById('view-routine').classList.toggle('hidden-view', tab !== 'routine');
     document.getElementById('view-history').classList.toggle('hidden-view', tab !== 'history');
-    document.getElementById('view-progress').classList.toggle('hidden-view', tab !== 'progress');
     document.getElementById('view-add').classList.toggle('hidden-view', tab !== 'add');
 
     if (tab === 'history') loadHistory();
-    if (tab === 'progress') loadProgressMetrics();
   }
 
   function renderExercises() {
@@ -629,7 +555,44 @@
     return `${s}s`;
   }
 
-  /* HISTORIAL REDISEÑADO CON FORMATO LIMPIO Y ORDENADO */
+  /* ELIMINAR REGISTROS DE LA BASE DE DATOS */
+  function deleteHistoryRecord(dateToDelete) {
+    if (!confirm(`¿Eliminar el historial del ${dateToDelete}?`)) return;
+
+    const tx = db.transaction(["workouts", "sessions"], "readwrite");
+    const workoutsStore = tx.objectStore("workouts");
+    const sessionsStore = tx.objectStore("sessions");
+
+    // Borrar series del día
+    const reqW = workoutsStore.openCursor();
+    reqW.onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) {
+        if (cursor.value.date === dateToDelete) {
+          cursor.delete();
+        }
+        cursor.continue();
+      }
+    };
+
+    // Borrar sesión del día
+    const reqS = sessionsStore.openCursor();
+    reqS.onsuccess = (e) => {
+      const cursor = e.target.result;
+      if (cursor) {
+        if (cursor.value.date === dateToDelete) {
+          cursor.delete();
+        }
+        cursor.continue();
+      }
+    };
+
+    tx.oncomplete = () => {
+      loadHistory();
+    };
+  }
+
+  /* HISTORIAL REDISEÑADO + SWIPE TO DELETE */
   function loadHistory() {
     const container = document.getElementById('history-container');
     if (!db) return;
@@ -691,7 +654,6 @@
 
         let summaryHTML = '';
         for (let ex in exSummary) {
-          // Ordenar series numéricamente (S1, S2, S3...)
           exSummary[ex].sort((a,b) => a.set - b.set);
           
           let setChips = exSummary[ex].map(s => `
@@ -716,8 +678,10 @@
         const wrapper = document.createElement('div');
         wrapper.className = 'swipe-container';
         wrapper.innerHTML = `
-          <div class="swipe-bg"><span class="material-symbols-outlined">delete</span></div>
-          <div class="swipe-content">
+          <div class="swipe-bg" onclick="deleteHistoryRecord('${d}')">
+            <span class="material-symbols-outlined">delete</span>
+          </div>
+          <div class="swipe-content" id="swipe-${d}">
             <div class="history-header">
               <div class="history-date">${d}</div>
               <div class="history-total-time">Duración: ${totalFormatted}</div>
@@ -727,6 +691,32 @@
           </div>
         `;
         container.appendChild(wrapper);
+
+        // Lógica Touch / Swipe
+        const swipeContent = wrapper.querySelector('.swipe-content');
+        let startX = 0;
+        let currentX = 0;
+
+        swipeContent.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+        }, { passive: true });
+
+        swipeContent.addEventListener('touchmove', (e) => {
+          currentX = e.touches[0].clientX;
+          let diff = currentX - startX;
+          if (diff < 0 && diff > -100) {
+            swipeContent.style.transform = `translateX(${diff}px)`;
+          }
+        }, { passive: true });
+
+        swipeContent.addEventListener('touchend', () => {
+          let diff = currentX - startX;
+          if (diff < -50) {
+            swipeContent.style.transform = `translateX(-70px)`;
+          } else {
+            swipeContent.style.transform = `translateX(0px)`;
+          }
+        });
       });
     }
   }
@@ -738,7 +728,7 @@
     
     const bar = document.getElementById('rest-bar');
     bar.classList.remove('hidden');
-    document.body.classList.add('rest-active'); // Aumenta margen inferior para no tapar contenido
+    document.body.classList.add('rest-active');
     
     updateRestDisplay();
     restInterval = setInterval(updateRestDisplay, 1000);
@@ -750,7 +740,7 @@
     restSecondsLeft = 0;
     restTotalDuration = 0;
     document.getElementById('rest-bar').classList.add('hidden');
-    document.body.classList.remove('rest-active'); // Restaura margen inferior
+    document.body.classList.remove('rest-active');
   }
 
   function updateRestDisplay() {
