@@ -328,7 +328,7 @@
     <div id="history-container"></div>
   </div>
 
-  <!-- Vista Progreso (NUEVA) -->
+  <!-- Vista Progreso -->
   <div id="view-progress" class="hidden-view">
     <div class="card">
       <div class="metric-label">Promedio Semanal (Últimas 4 semanas)</div>
@@ -501,8 +501,10 @@
   }
 
   let selectedDay = getTodayName();
-  let workoutActive = false;
-  let workoutStartTime = null;
+
+  // TIMER PERSISTENTE
+  let workoutActive = localStorage.getItem('workout_active') === 'true';
+  let workoutStartTime = parseInt(localStorage.getItem('workout_start_time')) || null;
   let workoutSeconds = 0;
   let workoutInterval = null;
 
@@ -802,7 +804,6 @@
   function loadProgressMetrics() {
     if (!db) return;
     
-    // Promedio Semanal
     const tx = db.transaction("sessions", "readonly");
     const req = tx.objectStore("sessions").getAll();
 
@@ -848,7 +849,6 @@
       });
       prDisplay.textContent = `${maxWeight} kg`;
 
-      // Agrupar por fecha
       const groupedByDate = {};
       records.forEach(r => {
         if (!groupedByDate[r.date] || r.weight > groupedByDate[r.date]) {
@@ -900,37 +900,61 @@
     renderExercises();
   }
 
-  // TIMER DE ENTRENAMIENTO
+  // MANEJO DEL TEMPORIZADOR PERSISTENTE Y BOTÓN ENTRENAMIENTO
   const btnWorkout = document.getElementById('btn-toggle-workout');
+
+  if (workoutActive && workoutStartTime) {
+    resumeWorkoutTimer();
+  }
+
   btnWorkout.onclick = () => {
     workoutActive = !workoutActive;
+    
     if (workoutActive) {
-      btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">stop</span> Finalizar`;
-      btnWorkout.classList.add('active');
       workoutStartTime = Date.now();
-      workoutInterval = setInterval(updateWorkoutTimerDisplay, 1000);
+      localStorage.setItem('workout_active', 'true');
+      localStorage.setItem('workout_start_time', workoutStartTime);
+      resumeWorkoutTimer();
     } else {
-      btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span> Iniciar`;
-      btnWorkout.classList.remove('active');
-      clearInterval(workoutInterval);
-
-      stopRestTimer();
-
-      if (workoutSeconds > 0 && db) {
-        const today = new Date().toISOString().split('T')[0];
-        const tx = db.transaction("sessions", "readwrite");
-        tx.objectStore("sessions").add({
-          date: today,
-          durationSeconds: workoutSeconds,
-          timestamp: Date.now()
-        });
+      if (confirm("¿Deseas finalizar la sesión de entrenamiento y guardar el tiempo?")) {
+        stopAndSaveWorkout();
+      } else {
+        workoutActive = true;
       }
-
-      workoutSeconds = 0;
-      workoutStartTime = null;
-      document.getElementById('workout-timer').textContent = "00:00:00";
     }
   };
+
+  function resumeWorkoutTimer() {
+    btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">stop</span> Finalizar`;
+    btnWorkout.classList.add('active');
+    updateWorkoutTimerDisplay();
+    clearInterval(workoutInterval);
+    workoutInterval = setInterval(updateWorkoutTimerDisplay, 1000);
+  }
+
+  function stopAndSaveWorkout() {
+    btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span> Iniciar`;
+    btnWorkout.classList.remove('active');
+    clearInterval(workoutInterval);
+    stopRestTimer();
+
+    if (workoutSeconds > 0 && db) {
+      const today = new Date().toISOString().split('T')[0];
+      const tx = db.transaction("sessions", "readwrite");
+      tx.objectStore("sessions").add({
+        date: today,
+        durationSeconds: workoutSeconds,
+        timestamp: Date.now()
+      });
+    }
+
+    workoutActive = false;
+    workoutSeconds = 0;
+    workoutStartTime = null;
+    localStorage.removeItem('workout_active');
+    localStorage.removeItem('workout_start_time');
+    document.getElementById('workout-timer').textContent = "00:00:00";
+  }
 
   function updateWorkoutTimerDisplay() {
     if (!workoutStartTime) return;
@@ -977,6 +1001,34 @@
     if (document.visibilityState === "visible") {
       if (workoutActive) updateWorkoutTimerDisplay();
       if (restEndTime) updateRestDisplay();
+    }
+  });
+
+  // PREVENIR CLOSING / BOTÓN ATRÁS EN ANDROID
+  window.addEventListener('load', () => {
+    history.pushState({ page: 'main' }, '', '');
+  });
+
+  window.addEventListener('popstate', (e) => {
+    if (workoutActive) {
+      history.pushState({ page: 'main' }, '', '');
+      if (confirm("Tienes un entrenamiento en curso. ¿Seguro que deseas salir y finalizarlo?")) {
+        stopAndSaveWorkout();
+        history.back();
+      }
+    } else {
+      const activeTabBtn = document.querySelector('.nav-item.active');
+      if (activeTabBtn && activeTabBtn.id !== 'tab-routine-btn') {
+        history.pushState({ page: 'main' }, '', '');
+        switchTab('routine');
+      }
+    }
+  });
+
+  window.addEventListener('beforeunload', (e) => {
+    if (workoutActive) {
+      e.preventDefault();
+      e.returnValue = '';
     }
   });
 
