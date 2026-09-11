@@ -6,17 +6,19 @@
   <title>Gym Tracker - Con Historial Local</title>
   <meta name="theme-color" content="#121214">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <!-- Enlace al Manifest y al Ícono -->
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon.png">
   <link rel="apple-touch-icon" href="/icon.png">
-  <!-- Habilita el modo PWA/Standalone en Chrome, Brave y Android -->
   <meta name="mobile-web-app-capable" content="yes">
-  <!-- Habilita el modo PWA/Standalone en Safari e iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="GymTracker">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      overscroll-behavior-y: none;
+      overscroll-behavior: none;
+    }
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #121214;
@@ -26,7 +28,6 @@
       max-width: 500px;
       margin: 0 auto;
       user-select: none;
-      overscroll-behavior-y: contain;
     }
     header {
       background: #1e1e24;
@@ -69,7 +70,7 @@
       border: none;
       color: #a8a8b3;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 13px;
       border-radius: 8px;
       cursor: pointer;
     }
@@ -223,6 +224,43 @@
     .history-day { font-size: 12px; color: #a8a8b3; margin-bottom: 8px; }
     .history-ex-list { font-size: 13px; color: #e1e1e6; line-height: 1.5; }
     .hidden-view { display: none; }
+
+    /* Formulario Nuevo Ejercicio */
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #a8a8b3;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+    .form-control {
+      width: 100%;
+      background: #121214;
+      border: 1px solid #29292e;
+      color: #fff;
+      padding: 12px;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 14px;
+      outline: none;
+    }
+    .form-control:focus { border-color: #00b37e; }
+    .btn-submit {
+      width: 100%;
+      background: #00b37e;
+      color: #fff;
+      border: none;
+      padding: 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 15px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -238,6 +276,7 @@
   <div class="tab-nav">
     <button class="tab-btn active" id="tab-routine-btn" onclick="switchTab('routine')">Rutina</button>
     <button class="tab-btn" id="tab-history-btn" onclick="switchTab('history')">Historial</button>
+    <button class="tab-btn" id="tab-add-btn" onclick="switchTab('add')">+ Ejercicio</button>
   </div>
 
   <!-- Vista Rutina -->
@@ -250,6 +289,47 @@
   <div id="view-history" class="hidden-view">
     <div id="history-container">
       <div style="text-align: center; color: #a8a8b3; padding: 20px;">Cargando historial...</div>
+    </div>
+  </div>
+
+  <!-- Vista Agregar Ejercicio -->
+  <div id="view-add" class="hidden-view">
+    <div class="card">
+      <div class="card-header">
+        <div class="exercise-title">Agregar Nuevo Ejercicio</div>
+        <div class="exercise-subtitle">Se añadirá a tu rutina guardada</div>
+      </div>
+      <div class="form-group">
+        <label>Nombre del Ejercicio</label>
+        <input type="text" id="add-ex-name" class="form-control" placeholder="Ej: Fondos en paralelas">
+      </div>
+      <div class="form-group">
+        <label>Día de la semana</label>
+        <select id="add-ex-day" class="form-control">
+          <option value="Lunes">Lunes</option>
+          <option value="Martes">Martes</option>
+          <option value="Miércoles">Miércoles</option>
+          <option value="Jueves">Jueves</option>
+          <option value="Viernes">Viernes</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Grupo Muscular</label>
+        <input type="text" id="add-ex-muscle" class="form-control" placeholder="Ej: Pecho / Tríceps">
+      </div>
+      <div class="form-group">
+        <label>Número de Series</label>
+        <input type="number" id="add-ex-sets" class="form-control" placeholder="Ej: 3" value="3">
+      </div>
+      <div class="form-group">
+        <label>Rango de Repeticiones</label>
+        <input type="text" id="add-ex-reps" class="form-control" placeholder="Ej: 8-12" value="10-12">
+      </div>
+      <div class="form-group">
+        <label>Descanso (Segundos)</label>
+        <input type="number" id="add-ex-rest" class="form-control" placeholder="Ej: 90" value="90">
+      </div>
+      <button class="btn-submit" onclick="addNewExercise()">Guardar Ejercicio</button>
     </div>
   </div>
 
@@ -284,65 +364,63 @@
     renderExercises();
   };
 
-  const DB_ROUTINE = [
-    { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 240 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Press inclinado con mancuernas", sets: 3, reps: "8-10", rest_sec: 240 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Press convergente en máquina", sets: 3, reps: "10-12", rest_sec: 240 },
-    { day: "Lunes", muscle: "Pecho", exercise: "Aperturas en polea", sets: 2, reps: "12-15", rest_sec: 240 },
-    { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 240 },
-    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 240 },
-    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 2, reps: "12-15", rest_sec: 240 },
+  const DEFAULT_ROUTINE = [
+    { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 150 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Press inclinado con mancuernas", sets: 3, reps: "8-10", rest_sec: 120 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Press convergente en máquina", sets: 3, reps: "10-12", rest_sec: 90 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Aperturas en polea", sets: 2, reps: "12-15", rest_sec: 60 },
+    { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 75 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 2, reps: "12-15", rest_sec: 75 },
+    
+    { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "6-10", rest_sec: 150 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 4, reps: "8-10", rest_sec: 150 },
+    { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 90 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo Hammer con apoyo", sets: 3, reps: "10-12", rest_sec: 90 },
+    { day: "Martes", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 90 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 75 },
 
-    { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "6-10", rest_sec: 240 },
-    { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 4, reps: "8-10", rest_sec: 240 },
-    { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 240 },
-    { day: "Martes", muscle: "Espalda", exercise: "Remo Hammer con apoyo", sets: 3, reps: "10-12", rest_sec: 240 },
-    { day: "Martes", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 240 },
-    { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 240 },
-    { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 240 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas", sets: 4, reps: "8-10", rest_sec: 150 },
+    { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 150 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 120 },
+    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuádriceps", sets: 4, reps: "8-10", rest_sec: 90 },
+    { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 90 },
 
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas con barra", sets: 4, reps: "8-10", rest_sec: 240 },
-    { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 240 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 240 },
-    { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuádriceps", sets: 4, reps: "8-10", rest_sec: 240 },
-    { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 240 },
+    { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Remo sentado en polea", sets: 3, reps: "10-12", rest_sec: 120 },
+    { day: "Jueves", muscle: "Deltoide lateral", exercise: "Elevaciones laterales con mancuernas", sets: 4, reps: "15-25", rest_sec: 60 },
+    { day: "Jueves", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
+    { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Jueves", muscle: "Tríceps", exercise: "Tríceps cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
 
-    { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 240 },
-    { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 240 },
-    { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-12", rest_sec: 240 },
-    { day: "Jueves", muscle: "Espalda", exercise: "Remo sentado en polea", sets: 3, reps: "10-12", rest_sec: 240 },
-    { day: "Jueves", muscle: "Deltoide lateral", exercise: "Elevaciones laterales con mancuernas", sets: 4, reps: "15-25", rest_sec: 240 },
-    { day: "Jueves", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 240 },
-    { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado", sets: 3, reps: "10-15", rest_sec: 240 },
-    { day: "Jueves", muscle: "Tríceps", exercise: "Tríceps cuerda", sets: 3, reps: "10-15", rest_sec: 240 },
-
-    { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 240 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 240 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 240 },
-    { day: "Viernes", muscle: "Deltoide lateral", exercise: "Elevación lateral en máquina", sets: 4, reps: "15-25", rest_sec: 240 },
-    { day: "Viernes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 240 },
-    { day: "Viernes", muscle: "Bíceps", exercise: "Curl Bayesian", sets: 3, reps: "10-15", rest_sec: 240 },
-    { day: "Viernes", muscle: "Bíceps", exercise: "Curl martillo", sets: 2, reps: "12-15", rest_sec: 240 },
-    { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 240 }
+    { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 120 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 75 },
+    { day: "Viernes", muscle: "Deltoide lateral", exercise: "Elevación lateral en máquina", sets: 4, reps: "15-25", rest_sec: 60 },
+    { day: "Viernes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 60 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl Bayesian", sets: 3, reps: "10-15", rest_sec: 75 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl martillo", sets: 2, reps: "12-15", rest_sec: 75 },
+    { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 75 }
   ];
 
-  // FUNCIÓN PARA DETECTAR EL DÍA ACTUAL
+  let DB_ROUTINE = JSON.parse(localStorage.getItem('custom_routine')) || DEFAULT_ROUTINE;
+
   function getTodayName() {
-    const dayIndex = new Date().getDay(); // 0 = Domingo, 1 = Lunes, ..., 4 = Jueves, ..., 6 = Sábado
-    const dayMap = {
-      1: "Lunes",
-      2: "Martes",
-      3: "Miércoles",
-      4: "Jueves",
-      5: "Viernes"
-    };
-    return dayMap[dayIndex] || "Lunes"; // Si es Fin de Semana (Sábado/Domingo), muestra Lunes por defecto
+    const dayIndex = new Date().getDay();
+    const dayMap = { 1: "Lunes", 2: "Martes", 3: "Miércoles", 4: "Jueves", 5: "Viernes" };
+    return dayMap[dayIndex] || "Lunes";
   }
 
-  let selectedDay = getTodayName(); // Asigna el día actual automáticamente
+  let selectedDay = getTodayName();
   let workoutActive = false;
+  let workoutStartTime = null;
   let workoutSeconds = 0;
   let workoutInterval = null;
+
+  let restEndTime = null;
   let restSecondsLeft = 0;
   let restInterval = null;
 
@@ -364,8 +442,12 @@
   function switchTab(tab) {
     document.getElementById('tab-routine-btn').classList.toggle('active', tab === 'routine');
     document.getElementById('tab-history-btn').classList.toggle('active', tab === 'history');
+    document.getElementById('tab-add-btn').classList.toggle('active', tab === 'add');
+    
     document.getElementById('view-routine').classList.toggle('hidden-view', tab !== 'routine');
     document.getElementById('view-history').classList.toggle('hidden-view', tab !== 'history');
+    document.getElementById('view-add').classList.toggle('hidden-view', tab !== 'add');
+
     if (tab === 'history') loadHistory();
   }
 
@@ -547,20 +629,45 @@
     }
   }
 
+  // AGREGAR NUEVO EJERCICIO
+  function addNewExercise() {
+    const name = document.getElementById('add-ex-name').value.trim();
+    const day = document.getElementById('add-ex-day').value;
+    const muscle = document.getElementById('add-ex-muscle').value.trim();
+    const sets = parseInt(document.getElementById('add-ex-sets').value) || 3;
+    const reps = document.getElementById('add-ex-reps').value.trim() || "10-12";
+    const rest_sec = parseInt(document.getElementById('add-ex-rest').value) || 90;
+
+    if (!name || !muscle) {
+      alert("Por favor completa el nombre y el músculo del ejercicio.");
+      return;
+    }
+
+    const newEx = { day, muscle, exercise: name, sets, reps, rest_sec };
+    DB_ROUTINE.push(newEx);
+    localStorage.setItem('custom_routine', JSON.stringify(DB_ROUTINE));
+
+    document.getElementById('add-ex-name').value = '';
+    document.getElementById('add-ex-muscle').value = '';
+
+    alert("¡Ejercicio agregado con éxito!");
+    selectedDay = day;
+    document.querySelectorAll('.day-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent === day);
+    });
+    switchTab('routine');
+    renderExercises();
+  }
+
+  // TIMER DE ENTRENAMIENTO
   const btnWorkout = document.getElementById('btn-toggle-workout');
   btnWorkout.onclick = () => {
     workoutActive = !workoutActive;
     if (workoutActive) {
       btnWorkout.textContent = 'Finalizar';
       btnWorkout.classList.add('active');
-      workoutSeconds = 0;
-      workoutInterval = setInterval(() => {
-        workoutSeconds++;
-        const h = String(Math.floor(workoutSeconds / 3600)).padStart(2, '0');
-        const m = String(Math.floor((workoutSeconds % 3600) / 60)).padStart(2, '0');
-        const s = String(workoutSeconds % 60).padStart(2, '0');
-        document.getElementById('workout-timer').textContent = `${h}:${m}:${s}`;
-      }, 1000);
+      workoutStartTime = Date.now();
+      workoutInterval = setInterval(updateWorkoutTimerDisplay, 1000);
     } else {
       btnWorkout.textContent = 'Iniciar Sesión';
       btnWorkout.classList.remove('active');
@@ -578,52 +685,89 @@
         });
       }
 
+      workoutSeconds = 0;
+      workoutStartTime = null;
       document.getElementById('workout-timer').textContent = "00:00:00";
     }
   };
 
+  function updateWorkoutTimerDisplay() {
+    if (!workoutStartTime) return;
+    workoutSeconds = Math.floor((Date.now() - workoutStartTime) / 1000);
+    const h = String(Math.floor(workoutSeconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((workoutSeconds % 3600) / 60)).padStart(2, '0');
+    const s = String(workoutSeconds % 60).padStart(2, '0');
+    document.getElementById('workout-timer').textContent = `${h}:${m}:${s}`;
+  }
+
+  // TIMER DE DESCANSO
   function startRestTimer(seconds) {
     clearInterval(restInterval);
-    restSecondsLeft = seconds;
+    restEndTime = Date.now() + (seconds * 1000);
     const bar = document.getElementById('rest-bar');
     bar.classList.remove('hidden');
     updateRestDisplay();
 
-    restInterval = setInterval(() => {
-      restSecondsLeft--;
-      if (restSecondsLeft <= 0) {
-        stopRestTimer();
-        if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
-      } else {
-        updateRestDisplay();
-      }
-    }, 1000);
+    restInterval = setInterval(updateRestDisplay, 1000);
   }
 
   function stopRestTimer() {
     clearInterval(restInterval);
+    restEndTime = null;
     restSecondsLeft = 0;
     document.getElementById('rest-bar').classList.add('hidden');
   }
 
   function updateRestDisplay() {
-    const m = String(Math.floor(restSecondsLeft / 60)).padStart(2, '0');
-    const s = String(restSecondsLeft % 60).padStart(2, '0');
-    document.getElementById('rest-timer').textContent = `${m}:${s}`;
+    if (!restEndTime) return;
+    restSecondsLeft = Math.ceil((restEndTime - Date.now()) / 1000);
+    
+    if (restSecondsLeft <= 0) {
+      stopRestTimer();
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+    } else {
+      const m = String(Math.floor(restSecondsLeft / 60)).padStart(2, '0');
+      const s = String(restSecondsLeft % 60).padStart(2, '0');
+      document.getElementById('rest-timer').textContent = `${m}:${s}`;
+    }
   }
 
-  // EVENTOS PARA App Shortcuts Y SERVICE WORKER
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab');
-    if (tab === 'history') {
-      switchTab('history');
-    } else if (tab === 'routine') {
-      switchTab('routine');
+  // RECALCULAR TIMERS AL VOLVER DEL BACKGROUND
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      if (workoutActive) updateWorkoutTimerDisplay();
+      if (restEndTime) updateRestDisplay();
     }
   });
 
-  document.getElementById('btn-add-30').onclick = () => { restSecondsLeft += 30; updateRestDisplay(); };
+  // PREVENIR PULL-TO-REFRESH POR SWIPE
+  let touchStartY = 0;
+  window.addEventListener('touchstart', (e) => {
+    touchStartY = e.touches[0].clientY;
+  }, { passive: false });
+
+  window.addEventListener('touchmove', (e) => {
+    const touchY = e.touches[0].clientY;
+    const touchDiff = touchY - touchStartY;
+    if (window.scrollY === 0 && touchDiff > 0) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  // EVENTOS Y SERVICE WORKER
+  window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab === 'history') switchTab('history');
+    else if (tab === 'routine') switchTab('routine');
+  });
+
+  document.getElementById('btn-add-30').onclick = () => { 
+    if (restEndTime) {
+      restEndTime += 30000; 
+      updateRestDisplay(); 
+    }
+  };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
 
   if ('serviceWorker' in navigator) {
