@@ -125,6 +125,30 @@
       border-color: #a8c7fa;
     }
 
+    /* Agrupadores Musculares en Rutina */
+    .muscle-group-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 20px 0 10px 0;
+    }
+    .muscle-group-header:first-child { margin-top: 4px; }
+    .muscle-badge {
+      background: #004a77;
+      color: #c2e7ff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+    }
+    .muscle-group-line {
+      flex: 1;
+      height: 1px;
+      background: #2b2b32;
+    }
+
     /* Cards Material You */
     .card {
       background: #1b1b21;
@@ -190,6 +214,32 @@
       justify-content: center;
     }
     .btn-check.done { background: #386a20; color: #b5f296; }
+
+    /* Empty States */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      background: #1b1b21;
+      border-radius: 16px;
+      border: 1px dashed #45464f;
+      margin-top: 8px;
+    }
+    .empty-state-icon {
+      font-size: 48px;
+      color: #004a77;
+      margin-bottom: 12px;
+    }
+    .empty-state-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #e2e2e9;
+      margin-bottom: 6px;
+    }
+    .empty-state-text {
+      font-size: 13px;
+      color: #90909a;
+      line-height: 1.4;
+    }
 
     /* Swipe to Delete Styles */
     .swipe-container {
@@ -502,11 +552,28 @@
 
   let selectedDay = getTodayName();
 
-  // TIMER PERSISTENTE
+  // TIMER PERSISTENTE Y WAKE LOCK
   let workoutActive = localStorage.getItem('workout_active') === 'true';
   let workoutStartTime = parseInt(localStorage.getItem('workout_start_time')) || null;
   let workoutSeconds = 0;
   let workoutInterval = null;
+  let wakeLock = null;
+
+  async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+      } catch (err) {
+        console.error(`Wake Lock error: ${err.name}, ${err.message}`);
+      }
+    }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock !== null) {
+      wakeLock.release().then(() => { wakeLock = null; });
+    }
+  }
 
   let restEndTime = null;
   let restSecondsLeft = 0;
@@ -557,7 +624,21 @@
     list.innerHTML = '';
     const exercises = DB_ROUTINE.filter(e => e.day === selectedDay);
 
+    let lastMuscleGroup = "";
+
     exercises.forEach((ex, exIdx) => {
+      // SEPARACIÓN VISUAL DE GRUPOS MUSCULARES
+      if (ex.muscle !== lastMuscleGroup) {
+        lastMuscleGroup = ex.muscle;
+        const groupHeader = document.createElement('div');
+        groupHeader.className = 'muscle-group-header';
+        groupHeader.innerHTML = `
+          <span class="muscle-badge">${ex.muscle}</span>
+          <div class="muscle-group-line"></div>
+        `;
+        list.appendChild(groupHeader);
+      }
+
       const card = document.createElement('div');
       card.className = 'card';
       
@@ -599,6 +680,11 @@
     const btn = document.getElementById(`btn_c_${inputIdSuffix}`);
     
     btn.classList.toggle('done');
+
+    // VIBRACIÓN HÁPTICA
+    if (navigator.vibrate) {
+      navigator.vibrate(50);
+    }
     
     if (w || r) {
       const today = new Date().toISOString().split('T')[0];
@@ -650,7 +736,7 @@
     return `${s}s`;
   }
 
-  // HISTORIAL Y SWIPE TO DELETE
+  // HISTORIAL Y SWIPE TO DELETE CON EMPTY STATES
   function loadHistory() {
     const container = document.getElementById('history-container');
     if (!db) return;
@@ -674,7 +760,13 @@
 
     function processHistoryData() {
       if ((!records || records.length === 0) && (!sessionRecords || sessionRecords.length === 0)) {
-        container.innerHTML = `<div style="text-align: center; color: #90909a; padding: 20px;">Sin registros guardados.</div>`;
+        container.innerHTML = `
+          <div class="empty-state">
+            <span class="material-symbols-outlined empty-state-icon">history</span>
+            <div class="empty-state-title">Sin historial registrado</div>
+            <div class="empty-state-text">Aún no registras entrenamientos esta semana.<br>¡Haz clic en "Iniciar" arriba para empezar tu primera sesión!</div>
+          </div>
+        `;
         return;
       }
 
@@ -786,7 +878,7 @@
     };
   }
 
-  // MÉTRICAS Y PROGRESO
+  // MÉTRICAS Y PROGRESO CON EMPTY STATES
   function populateProgressSelect() {
     const select = document.getElementById('progress-ex-select');
     select.innerHTML = '';
@@ -839,7 +931,13 @@
       
       if (!records || records.length === 0) {
         prDisplay.textContent = "0 kg";
-        list.innerHTML = `<div style="color: #90909a; font-size: 13px; text-align: center; padding: 12px;">Sin registros para este ejercicio.</div>`;
+        list.innerHTML = `
+          <div class="empty-state" style="padding: 24px 16px;">
+            <span class="material-symbols-outlined empty-state-icon" style="font-size: 36px;">monitoring</span>
+            <div class="empty-state-title">Sin cargas registradas</div>
+            <div class="empty-state-text">Completa series de este ejercicio para ver tu progresión de peso con el tiempo.</div>
+          </div>
+        `;
         return;
       }
 
@@ -927,6 +1025,7 @@
   function resumeWorkoutTimer() {
     btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">stop</span> Finalizar`;
     btnWorkout.classList.add('active');
+    requestWakeLock();
     updateWorkoutTimerDisplay();
     clearInterval(workoutInterval);
     workoutInterval = setInterval(updateWorkoutTimerDisplay, 1000);
@@ -935,6 +1034,7 @@
   function stopAndSaveWorkout() {
     btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span> Iniciar`;
     btnWorkout.classList.remove('active');
+    releaseWakeLock();
     clearInterval(workoutInterval);
     stopRestTimer();
 
@@ -999,7 +1099,10 @@
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      if (workoutActive) updateWorkoutTimerDisplay();
+      if (workoutActive) {
+        requestWakeLock();
+        updateWorkoutTimerDisplay();
+      }
       if (restEndTime) updateRestDisplay();
     }
   });
@@ -1062,7 +1165,7 @@
   };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
 
-  // DETECCIÓN DE NUEVA VERSIÓN PWA (ACTUALIZADA)
+  // DETECCIÓN DE NUEVA VERSIÓN PWA
   if ('serviceWorker' in navigator) {
     let refreshing = false;
 
