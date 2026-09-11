@@ -3,83 +3,97 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Gym Tracker - Con Historial Local</title>
-  <meta name="theme-color" content="#121214">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <title>Gym Tracker</title>
+  <meta name="theme-color" content="#121318">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" type="image/png" sizes="192x192" href="/icon.png">
   <link rel="apple-touch-icon" href="/icon.png">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="GymTracker">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       overscroll-behavior-y: none;
       overscroll-behavior: none;
+      background-color: #121318;
+      color: #e2e2e9;
+      font-family: 'Roboto', sans-serif;
     }
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #121214;
-      color: #e1e1e6;
       padding: 16px;
-      padding-bottom: 110px;
+      padding-bottom: 90px;
       max-width: 500px;
       margin: 0 auto;
       user-select: none;
     }
+
+    /* Top Bar - Material 3 */
     header {
-      background: #1e1e24;
+      background: #1b1b21;
       padding: 16px;
-      border-radius: 16px;
+      border-radius: 20px;
       margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border: 1px solid #29292e;
+      border: 1px solid #2b2b32;
     }
-    .timer-title { font-size: 11px; text-transform: uppercase; color: #a8a8b3; font-weight: 700; }
-    .timer-display { font-size: 24px; font-weight: 800; color: #00b37e; font-variant-numeric: tabular-nums; }
+    .timer-title { font-size: 11px; text-transform: uppercase; color: #90909a; font-weight: 700; letter-spacing: 0.5px; }
+    .timer-display { font-size: 24px; font-weight: 700; color: #a8c7fa; font-variant-numeric: tabular-nums; }
     .btn-workout {
-      background: #00b37e;
-      color: #fff;
+      background: #a8c7fa;
+      color: #042e6f;
       border: none;
-      padding: 10px 16px;
-      border-radius: 10px;
+      padding: 10px 18px;
+      border-radius: 12px;
       font-weight: 700;
       font-size: 13px;
       cursor: pointer;
-    }
-    .btn-workout.active { background: #f75a68; }
-
-    /* Nav Tabs Main */
-    .tab-nav {
       display: flex;
-      background: #1e1e24;
-      border-radius: 12px;
-      padding: 4px;
-      margin-bottom: 16px;
-      border: 1px solid #29292e;
+      align-items: center;
+      gap: 6px;
     }
-    .tab-btn {
-      flex: 1;
-      padding: 10px;
+    .btn-workout.active { background: #f2b8b5; color: #601410; }
+
+    /* Material 3 Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 500px;
+      background: #1b1b21;
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 0 12px 0;
+      border-top: 1px solid #2b2b32;
+      z-index: 90;
+    }
+    .nav-item {
       background: transparent;
       border: none;
-      color: #a8a8b3;
-      font-weight: 700;
-      font-size: 13px;
-      border-radius: 8px;
+      color: #c6c5d0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      font-weight: 500;
       cursor: pointer;
+      flex: 1;
     }
-    .tab-btn.active {
-      background: #00b37e;
-      color: #fff;
+    .nav-icon-wrapper {
+      padding: 4px 16px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
+    .nav-item.active .nav-icon-wrapper { background: #004a77; color: #c2e7ff; }
+    .nav-item.active { color: #e2e2e9; font-weight: 700; }
 
-    /* Selector de días */
+    /* Chips de Selección de Día */
     .day-selector {
       display: flex;
       gap: 8px;
@@ -90,38 +104,37 @@
     }
     .day-selector::-webkit-scrollbar { display: none; }
     .day-btn {
-      background: #202024;
-      color: #a8a8b3;
-      border: 1px solid #29292e;
-      padding: 10px 18px;
-      border-radius: 12px;
-      font-weight: 700;
+      background: #1b1b21;
+      color: #c6c5d0;
+      border: 1px solid #45464f;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 500;
       font-size: 13px;
       cursor: pointer;
       white-space: nowrap;
     }
     .day-btn.active {
-      background: #29292e;
-      color: #00b37e;
-      border-color: #00b37e;
+      background: #004a77;
+      color: #c2e7ff;
+      border-color: #a8c7fa;
     }
 
-    /* Cards Ejercicio */
+    /* Cards Material You */
     .card {
-      background: #202024;
+      background: #1b1b21;
       border-radius: 16px;
       padding: 16px;
-      margin-bottom: 16px;
-      border: 1px solid #29292e;
+      margin-bottom: 12px;
+      border: 1px solid #2b2b32;
     }
-    .card-header { margin-bottom: 12px; }
-    .exercise-title { font-size: 16px; font-weight: 700; color: #fff; }
-    .exercise-subtitle { font-size: 12px; color: #00b37e; font-weight: 600; margin-top: 2px; }
+    .exercise-title { font-size: 16px; font-weight: 700; color: #e2e2e9; }
+    .exercise-subtitle { font-size: 12px; color: #a8c7fa; font-weight: 500; margin-top: 2px; }
     .last-performance {
       font-size: 11px;
-      color: #a8a8b3;
-      background: #121214;
-      padding: 6px 10px;
+      color: #90909a;
+      background: #121318;
+      padding: 4px 8px;
       border-radius: 6px;
       margin-top: 6px;
       display: inline-block;
@@ -131,14 +144,13 @@
       display: grid;
       grid-template-columns: 36px 1fr 1fr 44px;
       gap: 8px;
-      margin-bottom: 6px;
+      margin: 10px 0 6px 0;
       font-size: 11px;
-      color: #7c7c8a;
+      color: #90909a;
       font-weight: 700;
       text-transform: uppercase;
       text-align: center;
     }
-
     .set-row {
       display: grid;
       grid-template-columns: 36px 1fr 1fr 44px;
@@ -146,12 +158,12 @@
       align-items: center;
       margin-bottom: 8px;
     }
-    .set-num { font-size: 13px; font-weight: 700; color: #a8a8b3; text-align: center; }
+    .set-num { font-size: 13px; font-weight: 700; color: #c6c5d0; text-align: center; }
     .input-field {
-      background: #121214;
-      border: 1px solid #29292e;
+      background: #121318;
+      border: 1px solid #45464f;
       color: #fff;
-      padding: 10px;
+      padding: 8px;
       border-radius: 8px;
       text-align: center;
       font-weight: 700;
@@ -159,125 +171,109 @@
       width: 100%;
       outline: none;
     }
-    .input-field:focus { border-color: #00b37e; }
+    .input-field:focus { border-color: #a8c7fa; }
     .btn-check {
-      background: #29292e;
+      background: #2b2b32;
       border: none;
-      color: #a8a8b3;
+      color: #c6c5d0;
       border-radius: 8px;
-      height: 38px;
+      height: 36px;
       cursor: pointer;
-      font-size: 18px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .btn-check.done { background: #00b37e; color: #fff; }
+    .btn-check.done { background: #386a20; color: #b5f296; }
 
-    /* Barra Rest */
+    /* Swipe to Delete Styles */
+    .swipe-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      margin-bottom: 12px;
+    }
+    .swipe-bg {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      background: #8c1d18;
+      color: #f2b8b5;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 20px;
+      border-radius: 16px;
+    }
+    .swipe-content {
+      position: relative;
+      background: #1b1b21;
+      border: 1px solid #2b2b32;
+      border-radius: 16px;
+      padding: 14px;
+      transition: transform 0.15s ease-out;
+      touch-action: pan-y;
+    }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .history-date { font-size: 14px; font-weight: 700; color: #a8c7fa; }
+    .history-total-time { font-size: 11px; font-weight: 700; color: #a8c7fa; background: #121318; padding: 4px 8px; border-radius: 6px; }
+    .history-day { font-size: 12px; color: #90909a; margin-bottom: 6px; }
+    .history-ex-list { font-size: 13px; color: #e2e2e9; line-height: 1.4; }
+
+    /* Barra Rest Material */
     .rest-bar {
       position: fixed;
-      bottom: 16px;
+      bottom: 76px;
       left: 50%;
       transform: translateX(-50%);
       width: calc(100% - 32px);
       max-width: 468px;
-      background: #f75a68;
-      color: #fff;
+      background: #8c1d18;
+      color: #ffdad6;
       padding: 12px 20px;
       border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 8px 24px rgba(247, 90, 104, 0.3);
       z-index: 100;
     }
     .rest-bar.hidden { display: none; }
-    .rest-time { font-size: 22px; font-weight: 800; font-variant-numeric: tabular-nums; }
+    .rest-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
     .btn-rest-ctrl {
-      background: rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.15);
       border: none;
       color: #fff;
-      padding: 8px 12px;
+      padding: 6px 12px;
       border-radius: 8px;
       font-weight: 700;
-      font-size: 13px;
-      cursor: pointer;
-    }
-
-    /* Historial Styles */
-    .history-item {
-      background: #202024;
-      border-radius: 12px;
-      padding: 14px;
-      margin-bottom: 12px;
-      border: 1px solid #29292e;
-    }
-    .history-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 6px;
-    }
-    .history-date { font-size: 14px; font-weight: 800; color: #00b37e; }
-    .history-total-time { font-size: 12px; font-weight: 700; color: #00b37e; background: #121214; padding: 4px 8px; border-radius: 6px; }
-    .history-day { font-size: 12px; color: #a8a8b3; margin-bottom: 8px; }
-    .history-ex-list { font-size: 13px; color: #e1e1e6; line-height: 1.5; }
-    .hidden-view { display: none; }
-
-    /* Formulario Nuevo Ejercicio */
-    .form-group {
-      margin-bottom: 14px;
-    }
-    .form-group label {
-      display: block;
       font-size: 12px;
-      font-weight: 700;
-      color: #a8a8b3;
-      margin-bottom: 6px;
-      text-transform: uppercase;
-    }
-    .form-control {
-      width: 100%;
-      background: #121214;
-      border: 1px solid #29292e;
-      color: #fff;
-      padding: 12px;
-      border-radius: 10px;
-      font-family: inherit;
-      font-size: 14px;
-      outline: none;
-    }
-    .form-control:focus { border-color: #00b37e; }
-    .btn-submit {
-      width: 100%;
-      background: #00b37e;
-      color: #fff;
-      border: none;
-      padding: 14px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 15px;
       cursor: pointer;
-      margin-top: 10px;
     }
+
+    /* Formulario */
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 11px; font-weight: 700; color: #90909a; margin-bottom: 4px; text-transform: uppercase; }
+    .form-control {
+      width: 100%; background: #121318; border: 1px solid #45464f; color: #fff; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none;
+    }
+    .form-control:focus { border-color: #a8c7fa; }
+    .btn-submit {
+      width: 100%; background: #a8c7fa; color: #042e6f; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 8px;
+    }
+    .hidden-view { display: none; }
   </style>
 </head>
 <body>
 
   <header>
     <div>
-      <div class="timer-title">Tiempo de Entrenamiento</div>
+      <div class="timer-title">Entrenamiento</div>
       <div class="timer-display" id="workout-timer">00:00:00</div>
     </div>
-    <button class="btn-workout" id="btn-toggle-workout">Iniciar Sesión</button>
+    <button class="btn-workout" id="btn-toggle-workout">
+      <span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
+      Iniciar
+    </button>
   </header>
-
-  <div class="tab-nav">
-    <button class="tab-btn active" id="tab-routine-btn" onclick="switchTab('routine')">Rutina</button>
-    <button class="tab-btn" id="tab-history-btn" onclick="switchTab('history')">Historial</button>
-    <button class="tab-btn" id="tab-add-btn" onclick="switchTab('add')">+ Ejercicio</button>
-  </div>
 
   <!-- Vista Rutina -->
   <div id="view-routine">
@@ -287,24 +283,19 @@
 
   <!-- Vista Historial -->
   <div id="view-history" class="hidden-view">
-    <div id="history-container">
-      <div style="text-align: center; color: #a8a8b3; padding: 20px;">Cargando historial...</div>
-    </div>
+    <div id="history-container"></div>
   </div>
 
   <!-- Vista Agregar Ejercicio -->
   <div id="view-add" class="hidden-view">
     <div class="card">
-      <div class="card-header">
-        <div class="exercise-title">Agregar Nuevo Ejercicio</div>
-        <div class="exercise-subtitle">Se añadirá a tu rutina guardada</div>
-      </div>
+      <div class="exercise-title" style="margin-bottom: 12px;">Nuevo Ejercicio</div>
       <div class="form-group">
-        <label>Nombre del Ejercicio</label>
+        <label>Nombre</label>
         <input type="text" id="add-ex-name" class="form-control" placeholder="Ej: Fondos en paralelas">
       </div>
       <div class="form-group">
-        <label>Día de la semana</label>
+        <label>Día</label>
         <select id="add-ex-day" class="form-control">
           <option value="Lunes">Lunes</option>
           <option value="Martes">Martes</option>
@@ -318,21 +309,22 @@
         <input type="text" id="add-ex-muscle" class="form-control" placeholder="Ej: Pecho / Tríceps">
       </div>
       <div class="form-group">
-        <label>Número de Series</label>
-        <input type="number" id="add-ex-sets" class="form-control" placeholder="Ej: 3" value="3">
+        <label>Series</label>
+        <input type="number" id="add-ex-sets" class="form-control" value="3">
       </div>
       <div class="form-group">
-        <label>Rango de Repeticiones</label>
-        <input type="text" id="add-ex-reps" class="form-control" placeholder="Ej: 8-12" value="10-12">
+        <label>Repeticiones</label>
+        <input type="text" id="add-ex-reps" class="form-control" value="10-12">
       </div>
       <div class="form-group">
-        <label>Descanso (Segundos)</label>
-        <input type="number" id="add-ex-rest" class="form-control" placeholder="Ej: 90" value="90">
+        <label>Descanso (segundos)</label>
+        <input type="number" id="add-ex-rest" class="form-control" value="90">
       </div>
       <button class="btn-submit" onclick="addNewExercise()">Guardar Ejercicio</button>
     </div>
   </div>
 
+  <!-- Barra Rest -->
   <div class="rest-bar hidden" id="rest-bar">
     <div>
       <div style="font-size: 10px; text-transform: uppercase; font-weight: 700;">Descanso</div>
@@ -343,6 +335,22 @@
       <button class="btn-rest-ctrl" id="btn-skip-rest">Saltar</button>
     </div>
   </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" id="tab-routine-btn" onclick="switchTab('routine')">
+      <div class="nav-icon-wrapper"><span class="material-symbols-outlined">fitness_center</span></div>
+      <span>Rutina</span>
+    </button>
+    <button class="nav-item" id="tab-history-btn" onclick="switchTab('history')">
+      <div class="nav-icon-wrapper"><span class="material-symbols-outlined">history</span></div>
+      <span>Historial</span>
+    </button>
+    <button class="nav-item" id="tab-add-btn" onclick="switchTab('add')">
+      <div class="nav-icon-wrapper"><span class="material-symbols-outlined">add_circle</span></div>
+      <span>Añadir</span>
+    </button>
+  </nav>
 
 <script>
   let db;
@@ -549,16 +557,14 @@
     return `${s}s`;
   }
 
+  // HISTORIAL Y SWIPE TO DELETE
   function loadHistory() {
     const container = document.getElementById('history-container');
     if (!db) return;
     
     const tx = db.transaction(["workouts", "sessions"], "readonly");
-    const storeWorkouts = tx.objectStore("workouts");
-    const storeSessions = tx.objectStore("sessions");
-
-    const reqWorkouts = storeWorkouts.getAll();
-    const reqSessions = storeSessions.getAll();
+    const reqWorkouts = tx.objectStore("workouts").getAll();
+    const reqSessions = tx.objectStore("sessions").getAll();
 
     let records = [];
     let sessionRecords = [];
@@ -575,7 +581,7 @@
 
     function processHistoryData() {
       if ((!records || records.length === 0) && (!sessionRecords || sessionRecords.length === 0)) {
-        container.innerHTML = `<div style="text-align: center; color: #a8a8b3; padding: 20px;">Aún no tienes registros guardados.</div>`;
+        container.innerHTML = `<div style="text-align: center; color: #90909a; padding: 20px;">Sin registros guardados.</div>`;
         return;
       }
 
@@ -594,7 +600,7 @@
       const allDates = Array.from(new Set([...Object.keys(grouped), ...Object.keys(dayTimeTotals)]))
                              .sort((a,b) => b.localeCompare(a));
       
-      let html = '';
+      container.innerHTML = '';
       allDates.forEach(d => {
         const items = grouped[d] || [];
         const totalSecs = dayTimeTotals[d] || 0;
@@ -609,13 +615,18 @@
         for (let ex in exSummary) {
           summaryText += `<div><strong>${ex}:</strong> ${exSummary[ex].join(', ')}</div>`;
         }
-        if (!summaryText) summaryText = `<div style="color: #7c7c8a; font-style: italic;">Sesión de tiempo registrada sin series guardadas.</div>`;
+        if (!summaryText) summaryText = `<div style="color: #90909a; font-style: italic;">Sesión de tiempo registrada sin series guardadas.</div>`;
 
         const dayName = items.length > 0 ? items[0].day : '';
         const totalFormatted = totalSecs > 0 ? formatDuration(totalSecs) : '0s';
 
-        html += `
-          <div class="history-item">
+        const wrapper = document.createElement('div');
+        wrapper.className = 'swipe-container';
+        wrapper.innerHTML = `
+          <div class="swipe-bg">
+            <span class="material-symbols-outlined">delete</span>
+          </div>
+          <div class="swipe-content" id="card-${d}">
             <div class="history-header">
               <div class="history-date">${d}</div>
               <div class="history-total-time">Total: ${totalFormatted}</div>
@@ -624,12 +635,67 @@
             <div class="history-ex-list">${summaryText}</div>
           </div>
         `;
+
+        container.appendChild(wrapper);
+
+        // Lógica Touch/Swipe
+        const cardEl = wrapper.querySelector('.swipe-content');
+        let startX = 0;
+        let currentX = 0;
+
+        cardEl.addEventListener('touchstart', (e) => {
+          startX = e.touches[0].clientX;
+        }, { passive: true });
+
+        cardEl.addEventListener('touchmove', (e) => {
+          currentX = e.touches[0].clientX;
+          const diffX = currentX - startX;
+          if (diffX < 0) { // Solo deslizar a la izquierda
+            cardEl.style.transform = `translateX(${diffX}px)`;
+          }
+        }, { passive: true });
+
+        cardEl.addEventListener('touchend', () => {
+          const diffX = currentX - startX;
+          if (diffX < -120) { // Umbral de borrado
+            cardEl.style.transform = `translateX(-100%)`;
+            setTimeout(() => {
+              deleteDayRecords(d);
+            }, 150);
+          } else {
+            cardEl.style.transform = `translateX(0px)`;
+          }
+        });
       });
-      container.innerHTML = html;
     }
   }
 
-  // AGREGAR NUEVO EJERCICIO
+  // ELIMINAR REGISTROS DE UN DÍA EN INDEXEDDB
+  function deleteDayRecords(dateStr) {
+    if (!db) return;
+    const tx = db.transaction(["workouts", "sessions"], "readwrite");
+    const storeW = tx.objectStore("workouts");
+    const storeS = tx.objectStore("sessions");
+
+    const indexW = storeW.index("date");
+    const reqW = indexW.getAllKeys(dateStr);
+    reqW.onsuccess = () => {
+      reqW.result.forEach(k => storeW.delete(k));
+    };
+
+    const indexS = storeS.index("date");
+    const reqS = indexS.getAllKeys(dateStr);
+    reqS.onsuccess = () => {
+      reqS.result.forEach(k => storeS.delete(k));
+    };
+
+    tx.oncomplete = () => {
+      loadHistory();
+      renderExercises();
+    };
+  }
+
+  // AGREGAR EJERCICIO
   function addNewExercise() {
     const name = document.getElementById('add-ex-name').value.trim();
     const day = document.getElementById('add-ex-day').value;
@@ -639,7 +705,7 @@
     const rest_sec = parseInt(document.getElementById('add-ex-rest').value) || 90;
 
     if (!name || !muscle) {
-      alert("Por favor completa el nombre y el músculo del ejercicio.");
+      alert("Completa el nombre y el músculo.");
       return;
     }
 
@@ -650,7 +716,7 @@
     document.getElementById('add-ex-name').value = '';
     document.getElementById('add-ex-muscle').value = '';
 
-    alert("¡Ejercicio agregado con éxito!");
+    alert("¡Ejercicio agregado!");
     selectedDay = day;
     document.querySelectorAll('.day-btn').forEach(b => {
       b.classList.toggle('active', b.textContent === day);
@@ -664,12 +730,12 @@
   btnWorkout.onclick = () => {
     workoutActive = !workoutActive;
     if (workoutActive) {
-      btnWorkout.textContent = 'Finalizar';
+      btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">stop</span> Finalizar`;
       btnWorkout.classList.add('active');
       workoutStartTime = Date.now();
       workoutInterval = setInterval(updateWorkoutTimerDisplay, 1000);
     } else {
-      btnWorkout.textContent = 'Iniciar Sesión';
+      btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span> Iniciar`;
       btnWorkout.classList.remove('active');
       clearInterval(workoutInterval);
 
@@ -732,7 +798,6 @@
     }
   }
 
-  // RECALCULAR TIMERS AL VOLVER DEL BACKGROUND
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
       if (workoutActive) updateWorkoutTimerDisplay();
@@ -740,7 +805,7 @@
     }
   });
 
-  // PREVENIR PULL-TO-REFRESH POR SWIPE
+  // PREVENIR PULL-TO-REFRESH
   let touchStartY = 0;
   window.addEventListener('touchstart', (e) => {
     touchStartY = e.touches[0].clientY;
@@ -754,7 +819,6 @@
     }
   }, { passive: false });
 
-  // EVENTOS Y SERVICE WORKER
   window.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab');
@@ -771,8 +835,7 @@
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .catch(err => console.log('SW error:', err));
+    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
   }
 </script>
 </body>
