@@ -27,8 +27,11 @@
       user-select: none;
     }
 
-    /* Top Bar - Material 3 */
+    /* Top Bar Sticky - Material 3 */
     header {
+      position: sticky;
+      top: 0;
+      z-index: 80;
       background: #1b1b21;
       padding: 16px;
       border-radius: 20px;
@@ -37,6 +40,7 @@
       justify-content: space-between;
       align-items: center;
       border: 1px solid #2b2b32;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
     .timer-title { font-size: 11px; text-transform: uppercase; color: #90909a; font-weight: 700; letter-spacing: 0.5px; }
     .timer-display { font-size: 24px; font-weight: 700; color: #a8c7fa; font-variant-numeric: tabular-nums; }
@@ -101,6 +105,7 @@
       padding-bottom: 8px;
       margin-bottom: 16px;
       scrollbar-width: none;
+      scroll-behavior: smooth;
     }
     .day-selector::-webkit-scrollbar { display: none; }
     .day-btn {
@@ -219,6 +224,37 @@
     .history-day { font-size: 12px; color: #90909a; margin-bottom: 6px; }
     .history-ex-list { font-size: 13px; color: #e2e2e9; line-height: 1.4; }
 
+    /* Banner de Actualización PWA */
+    .update-banner {
+      position: fixed;
+      bottom: 76px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 32px);
+      max-width: 468px;
+      background: #004a77;
+      color: #c2e7ff;
+      padding: 12px 16px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+      border: 1px solid #a8c7fa;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .update-banner.hidden { display: none; }
+    .btn-update {
+      background: #a8c7fa;
+      color: #042e6f;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
     /* Barra Rest Material */
     .rest-bar {
       position: fixed;
@@ -234,7 +270,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      z-index: 100;
+      z-index: 99;
     }
     .rest-bar.hidden { display: none; }
     .rest-time { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -322,6 +358,12 @@
       </div>
       <button class="btn-submit" onclick="addNewExercise()">Guardar Ejercicio</button>
     </div>
+  </div>
+
+  <!-- Banner de Actualización -->
+  <div class="update-banner hidden" id="update-banner">
+    <div style="font-size: 13px; font-weight: 500;">¡Nueva versión disponible!</div>
+    <button class="btn-update" id="btn-reload-app">Actualizar</button>
   </div>
 
   <!-- Barra Rest -->
@@ -434,18 +476,29 @@
 
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const daySelector = document.getElementById('day-selector');
+  
   days.forEach(d => {
     const btn = document.createElement('button');
     btn.className = `day-btn ${d === selectedDay ? 'active' : ''}`;
     btn.textContent = d;
+    btn.id = `day-btn-${d}`;
     btn.onclick = () => {
       selectedDay = d;
       document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
+      btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       renderExercises();
     };
     daySelector.appendChild(btn);
   });
+
+  // Scroll automático al día seleccionado al iniciar
+  setTimeout(() => {
+    const activeBtn = document.getElementById(`day-btn-${selectedDay}`);
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, 100);
 
   function switchTab(tab) {
     document.getElementById('tab-routine-btn').classList.toggle('active', tab === 'routine');
@@ -650,14 +703,14 @@
         cardEl.addEventListener('touchmove', (e) => {
           currentX = e.touches[0].clientX;
           const diffX = currentX - startX;
-          if (diffX < 0) { // Solo deslizar a la izquierda
+          if (diffX < 0) {
             cardEl.style.transform = `translateX(${diffX}px)`;
           }
         }, { passive: true });
 
         cardEl.addEventListener('touchend', () => {
           const diffX = currentX - startX;
-          if (diffX < -120) { // Umbral de borrado
+          if (diffX < -120) {
             cardEl.style.transform = `translateX(-100%)`;
             setTimeout(() => {
               deleteDayRecords(d);
@@ -670,7 +723,6 @@
     }
   }
 
-  // ELIMINAR REGISTROS DE UN DÍA EN INDEXEDDB
   function deleteDayRecords(dateStr) {
     if (!db) return;
     const tx = db.transaction(["workouts", "sessions"], "readwrite");
@@ -695,7 +747,6 @@
     };
   }
 
-  // AGREGAR EJERCICIO
   function addNewExercise() {
     const name = document.getElementById('add-ex-name').value.trim();
     const day = document.getElementById('add-ex-day').value;
@@ -834,8 +885,24 @@
   };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
 
+  // DETECCIÓN DE NUEVA VERSIÓN PWA
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW error:', err));
+    let newWorker;
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      reg.addEventListener('updatefound', () => {
+        newWorker = reg.installing;
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            document.getElementById('update-banner').classList.remove('hidden');
+          }
+        });
+      });
+    }).catch(err => console.log('SW error:', err));
+
+    document.getElementById('btn-reload-app').onclick = () => {
+      if (newWorker) newWorker.postMessage({ action: 'skipWaiting' });
+      window.location.reload();
+    };
   }
 </script>
 </body>
