@@ -82,13 +82,13 @@
       flex-direction: column;
       align-items: center;
       gap: 4px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       cursor: pointer;
       flex: 1;
     }
     .nav-icon-wrapper {
-      padding: 4px 16px;
+      padding: 4px 12px;
       border-radius: 16px;
       display: flex;
       align-items: center;
@@ -224,6 +224,12 @@
     .history-day { font-size: 12px; color: #90909a; margin-bottom: 6px; }
     .history-ex-list { font-size: 13px; color: #e2e2e9; line-height: 1.4; }
 
+    /* Progreso Styles */
+    .metric-value { font-size: 28px; font-weight: 700; color: #a8c7fa; margin-top: 4px; }
+    .metric-label { font-size: 11px; color: #90909a; font-weight: 700; text-transform: uppercase; }
+    .pr-chip { background: #386a20; color: #b5f296; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+    .weight-history-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2b2b32; font-size: 13px; }
+
     /* Banner de Actualización PWA */
     .update-banner {
       position: fixed;
@@ -322,6 +328,31 @@
     <div id="history-container"></div>
   </div>
 
+  <!-- Vista Progreso (NUEVA) -->
+  <div id="view-progress" class="hidden-view">
+    <div class="card">
+      <div class="metric-label">Promedio Semanal (Últimas 4 semanas)</div>
+      <div class="metric-value" id="weekly-avg-display">0m / sem</div>
+      <div style="font-size: 12px; color: #90909a; margin-top: 4px;" id="total-time-month">Total del mes: 0 min</div>
+    </div>
+
+    <div class="card">
+      <div class="exercise-title" style="margin-bottom: 12px;">Evolución de Pesos</div>
+      <div class="form-group">
+        <label>Selecciona Ejercicio</label>
+        <select id="progress-ex-select" class="form-control" onchange="renderExerciseProgress()"></select>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin: 16px 0 8px 0;">
+        <div class="metric-label">Máximo Histórico (PR)</div>
+        <div class="pr-chip" id="pr-weight-display">0 kg</div>
+      </div>
+
+      <div class="metric-label" style="margin-top: 16px; margin-bottom: 8px;">Historial de Cargas</div>
+      <div id="weight-history-list"></div>
+    </div>
+  </div>
+
   <!-- Vista Agregar Ejercicio -->
   <div id="view-add" class="hidden-view">
     <div class="card">
@@ -388,6 +419,10 @@
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">history</span></div>
       <span>Historial</span>
     </button>
+    <button class="nav-item" id="tab-progress-btn" onclick="switchTab('progress')">
+      <div class="nav-icon-wrapper"><span class="material-symbols-outlined">analytics</span></div>
+      <span>Progreso</span>
+    </button>
     <button class="nav-item" id="tab-add-btn" onclick="switchTab('add')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">add_circle</span></div>
       <span>Añadir</span>
@@ -412,6 +447,7 @@
   dbReq.onsuccess = (e) => {
     db = e.target.result;
     renderExercises();
+    populateProgressSelect();
   };
 
   const DEFAULT_ROUTINE = [
@@ -492,7 +528,6 @@
     daySelector.appendChild(btn);
   });
 
-  // Scroll automático al día seleccionado al iniciar
   setTimeout(() => {
     const activeBtn = document.getElementById(`day-btn-${selectedDay}`);
     if (activeBtn) {
@@ -503,13 +538,16 @@
   function switchTab(tab) {
     document.getElementById('tab-routine-btn').classList.toggle('active', tab === 'routine');
     document.getElementById('tab-history-btn').classList.toggle('active', tab === 'history');
+    document.getElementById('tab-progress-btn').classList.toggle('active', tab === 'progress');
     document.getElementById('tab-add-btn').classList.toggle('active', tab === 'add');
     
     document.getElementById('view-routine').classList.toggle('hidden-view', tab !== 'routine');
     document.getElementById('view-history').classList.toggle('hidden-view', tab !== 'history');
+    document.getElementById('view-progress').classList.toggle('hidden-view', tab !== 'progress');
     document.getElementById('view-add').classList.toggle('hidden-view', tab !== 'add');
 
     if (tab === 'history') loadHistory();
+    if (tab === 'progress') loadProgressMetrics();
   }
 
   function renderExercises() {
@@ -567,8 +605,8 @@
         day: selectedDay,
         exercise: exerciseName,
         set: setNum,
-        weight: w || 0,
-        reps: r || 0,
+        weight: parseFloat(w) || 0,
+        reps: parseInt(r) || 0,
         timestamp: Date.now()
       };
       
@@ -691,7 +729,6 @@
 
         container.appendChild(wrapper);
 
-        // Lógica Touch/Swipe
         const cardEl = wrapper.querySelector('.swipe-content');
         let startX = 0;
         let currentX = 0;
@@ -747,6 +784,92 @@
     };
   }
 
+  // MÉTRICAS Y PROGRESO
+  function populateProgressSelect() {
+    const select = document.getElementById('progress-ex-select');
+    select.innerHTML = '';
+    const uniqueExercises = Array.from(new Set(DB_ROUTINE.map(e => e.exercise))).sort();
+    
+    uniqueExercises.forEach(ex => {
+      const opt = document.createElement('option');
+      opt.value = ex;
+      opt.textContent = ex;
+      select.appendChild(opt);
+    });
+    renderExerciseProgress();
+  }
+
+  function loadProgressMetrics() {
+    if (!db) return;
+    
+    // Promedio Semanal
+    const tx = db.transaction("sessions", "readonly");
+    const req = tx.objectStore("sessions").getAll();
+
+    req.onsuccess = () => {
+      const sessions = req.result;
+      const now = Date.now();
+      const fourWeeksMs = 28 * 24 * 60 * 60 * 1000;
+      
+      const recentSessions = sessions.filter(s => (now - s.timestamp) <= fourWeeksMs);
+      const totalSecs = recentSessions.reduce((acc, s) => acc + s.durationSeconds, 0);
+      
+      const weeklyAvgSecs = Math.round(totalSecs / 4);
+      document.getElementById('weekly-avg-display').textContent = formatDuration(weeklyAvgSecs) + " / sem";
+      document.getElementById('total-time-month').textContent = `Total acumulado (28 días): ${formatDuration(totalSecs)}`;
+    };
+
+    renderExerciseProgress();
+  }
+
+  function renderExerciseProgress() {
+    const select = document.getElementById('progress-ex-select');
+    if (!select.value || !db) return;
+
+    const selectedEx = select.value;
+    const tx = db.transaction("workouts", "readonly");
+    const index = tx.objectStore("workouts").index("exercise");
+    const req = index.getAll(selectedEx);
+
+    req.onsuccess = () => {
+      const records = req.result;
+      const prDisplay = document.getElementById('pr-weight-display');
+      const list = document.getElementById('weight-history-list');
+      
+      if (!records || records.length === 0) {
+        prDisplay.textContent = "0 kg";
+        list.innerHTML = `<div style="color: #90909a; font-size: 13px; text-align: center; padding: 12px;">Sin registros para este ejercicio.</div>`;
+        return;
+      }
+
+      let maxWeight = 0;
+      records.forEach(r => {
+        if (r.weight > maxWeight) maxWeight = r.weight;
+      });
+      prDisplay.textContent = `${maxWeight} kg`;
+
+      // Agrupar por fecha
+      const groupedByDate = {};
+      records.forEach(r => {
+        if (!groupedByDate[r.date] || r.weight > groupedByDate[r.date]) {
+          groupedByDate[r.date] = r.weight;
+        }
+      });
+
+      const dates = Object.keys(groupedByDate).sort((a,b) => b.localeCompare(a));
+      list.innerHTML = '';
+      dates.forEach(d => {
+        const item = document.createElement('div');
+        item.className = 'weight-history-item';
+        item.innerHTML = `
+          <span style="color: #c6c5d0;">${d}</span>
+          <span style="font-weight: 700; color: #a8c7fa;">${groupedByDate[d]} kg</span>
+        `;
+        list.appendChild(item);
+      });
+    };
+  }
+
   function addNewExercise() {
     const name = document.getElementById('add-ex-name').value.trim();
     const day = document.getElementById('add-ex-day').value;
@@ -768,6 +891,7 @@
     document.getElementById('add-ex-muscle').value = '';
 
     alert("¡Ejercicio agregado!");
+    populateProgressSelect();
     selectedDay = day;
     document.querySelectorAll('.day-btn').forEach(b => {
       b.classList.toggle('active', b.textContent === day);
@@ -874,6 +998,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab');
     if (tab === 'history') switchTab('history');
+    else if (tab === 'progress') switchTab('progress');
     else if (tab === 'routine') switchTab('routine');
   });
 
