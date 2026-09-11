@@ -25,9 +25,14 @@
       max-width: 500px;
       margin: 0 auto;
       user-select: none;
+      transition: padding-bottom 0.3s ease;
+    }
+    /* Espaciado extra cuando el timer flotante está activo */
+    body.rest-active {
+      padding-bottom: 160px;
     }
 
-    /* Top Bar Sticky - Material 3 */
+    /* Top Bar Sticky */
     header {
       position: sticky;
       top: 0;
@@ -59,7 +64,7 @@
     }
     .btn-workout.active { background: #f2b8b5; color: #601410; }
 
-    /* Material 3 Bottom Navigation */
+    /* Bottom Navigation */
     .bottom-nav {
       position: fixed;
       bottom: 0;
@@ -97,7 +102,7 @@
     .nav-item.active .nav-icon-wrapper { background: #004a77; color: #c2e7ff; }
     .nav-item.active { color: #e2e2e9; font-weight: 700; }
 
-    /* Chips de Selección de Día */
+    /* Day Selector */
     .day-selector {
       display: flex;
       gap: 8px;
@@ -125,7 +130,7 @@
       border-color: #a8c7fa;
     }
 
-    /* Agrupadores Musculares en Rutina */
+    /* Muscle Headers */
     .muscle-group-header {
       display: flex;
       align-items: center;
@@ -143,13 +148,9 @@
       border-radius: 8px;
       letter-spacing: 0.5px;
     }
-    .muscle-group-line {
-      flex: 1;
-      height: 1px;
-      background: #2b2b32;
-    }
+    .muscle-group-line { flex: 1; height: 1px; background: #2b2b32; }
 
-    /* Cards Material You */
+    /* Cards */
     .card {
       background: #1b1b21;
       border-radius: 16px;
@@ -215,103 +216,43 @@
     }
     .btn-check.done { background: #386a20; color: #b5f296; }
 
-    /* Empty States */
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      background: #1b1b21;
-      border-radius: 16px;
-      border: 1px dashed #45464f;
-      margin-top: 8px;
-    }
-    .empty-state-icon {
-      font-size: 48px;
-      color: #004a77;
-      margin-bottom: 12px;
-    }
-    .empty-state-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: #e2e2e9;
-      margin-bottom: 6px;
-    }
-    .empty-state-text {
-      font-size: 13px;
-      color: #90909a;
-      line-height: 1.4;
-    }
-
-    /* Swipe to Delete Styles */
-    .swipe-container {
-      position: relative;
-      overflow: hidden;
-      border-radius: 16px;
-      margin-bottom: 12px;
-    }
+    /* Historial Rediseñado */
+    .swipe-container { position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 12px; }
     .swipe-bg {
-      position: absolute;
-      top: 0; right: 0; bottom: 0; left: 0;
-      background: #8c1d18;
-      color: #f2b8b5;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 20px;
-      border-radius: 16px;
+      position: absolute; top: 0; right: 0; bottom: 0; left: 0;
+      background: #8c1d18; color: #f2b8b5;
+      display: flex; align-items: center; justify-content: flex-end;
+      padding-right: 20px; border-radius: 16px;
     }
     .swipe-content {
-      position: relative;
-      background: #1b1b21;
-      border: 1px solid #2b2b32;
-      border-radius: 16px;
-      padding: 14px;
-      transition: transform 0.15s ease-out;
-      touch-action: pan-y;
+      position: relative; background: #1b1b21; border: 1px solid #2b2b32;
+      border-radius: 16px; padding: 16px; transition: transform 0.15s ease-out; touch-action: pan-y;
     }
-    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
-    .history-date { font-size: 14px; font-weight: 700; color: #a8c7fa; }
-    .history-total-time { font-size: 11px; font-weight: 700; color: #a8c7fa; background: #121318; padding: 4px 8px; border-radius: 6px; }
-    .history-day { font-size: 12px; color: #90909a; margin-bottom: 6px; }
-    .history-ex-list { font-size: 13px; color: #e2e2e9; line-height: 1.4; }
-
-    /* Progreso Styles */
-    .metric-value { font-size: 28px; font-weight: 700; color: #a8c7fa; margin-top: 4px; }
-    .metric-label { font-size: 11px; color: #90909a; font-weight: 700; text-transform: uppercase; }
-    .pr-chip { background: #386a20; color: #b5f296; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
-    .weight-history-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2b2b32; font-size: 13px; }
-
-    /* Banner de Actualización PWA */
-    .update-banner {
-      position: fixed;
-      bottom: 76px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 32px);
-      max-width: 468px;
-      background: #004a77;
-      color: #c2e7ff;
-      padding: 12px 16px;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      z-index: 100;
-      border: 1px solid #a8c7fa;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-    }
-    .update-banner.hidden { display: none; }
-    .btn-update {
-      background: #a8c7fa;
-      color: #042e6f;
-      border: none;
-      padding: 8px 14px;
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .history-date { font-size: 15px; font-weight: 700; color: #a8c7fa; }
+    .history-total-time { font-size: 11px; font-weight: 700; color: #c2e7ff; background: #004a77; padding: 3px 8px; border-radius: 6px; }
+    .history-day { font-size: 12px; color: #90909a; margin-bottom: 12px; font-weight: 500; }
+    
+    .history-ex-item {
+      background: #121318;
       border-radius: 10px;
-      font-weight: 700;
-      font-size: 12px;
-      cursor: pointer;
+      padding: 10px 12px;
+      margin-top: 8px;
+      border: 1px solid #2b2b32;
     }
+    .history-ex-name { font-size: 13px; font-weight: 700; color: #e2e2e9; margin-bottom: 6px; }
+    .history-sets-flex { display: flex; flex-wrap: wrap; gap: 6px; }
+    .history-set-chip {
+      background: #2b2b32;
+      color: #c6c5d0;
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+    .history-set-chip strong { color: #a8c7fa; }
 
-    /* Barra Rest Material con Degradado Dinámico */
+    /* Barra Rest */
     .rest-bar {
       position: fixed;
       bottom: 76px;
@@ -344,16 +285,22 @@
       backdrop-filter: blur(4px);
     }
 
-    /* Formulario */
     .form-group { margin-bottom: 12px; }
     .form-group label { display: block; font-size: 11px; font-weight: 700; color: #90909a; margin-bottom: 4px; text-transform: uppercase; }
     .form-control {
       width: 100%; background: #121318; border: 1px solid #45464f; color: #fff; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none;
     }
-    .form-control:focus { border-color: #a8c7fa; }
     .btn-submit {
       width: 100%; background: #a8c7fa; color: #042e6f; border: none; padding: 12px; border-radius: 12px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 8px;
     }
+    .metric-value { font-size: 28px; font-weight: 700; color: #a8c7fa; margin-top: 4px; }
+    .metric-label { font-size: 11px; color: #90909a; font-weight: 700; text-transform: uppercase; }
+    .pr-chip { background: #386a20; color: #b5f296; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 700; }
+    .weight-history-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #2b2b32; font-size: 13px; }
+    .empty-state { text-align: center; padding: 40px 20px; background: #1b1b21; border-radius: 16px; border: 1px dashed #45464f; }
+    .empty-state-icon { font-size: 48px; color: #004a77; margin-bottom: 12px; }
+    .empty-state-title { font-size: 15px; font-weight: 700; color: #e2e2e9; margin-bottom: 6px; }
+    .empty-state-text { font-size: 13px; color: #90909a; line-height: 1.4; }
     .hidden-view { display: none; }
   </style>
 </head>
@@ -370,15 +317,18 @@
     </button>
   </header>
 
+  <!-- Vista Rutina -->
   <div id="view-routine">
     <div class="day-selector" id="day-selector"></div>
     <div id="exercise-list"></div>
   </div>
 
+  <!-- Vista Historial -->
   <div id="view-history" class="hidden-view">
     <div id="history-container"></div>
   </div>
 
+  <!-- Vista Progreso -->
   <div id="view-progress" class="hidden-view">
     <div class="card">
       <div class="metric-label">Promedio Semanal (Últimas 4 semanas)</div>
@@ -403,6 +353,7 @@
     </div>
   </div>
 
+  <!-- Vista Agregar Ejercicio -->
   <div id="view-add" class="hidden-view">
     <div class="card">
       <div class="exercise-title" style="margin-bottom: 12px;">Nuevo Ejercicio</div>
@@ -440,11 +391,7 @@
     </div>
   </div>
 
-  <div class="update-banner hidden" id="update-banner">
-    <div style="font-size: 13px; font-weight: 500;">¡Nueva versión disponible!</div>
-    <button class="btn-update" id="btn-reload-app">Actualizar</button>
-  </div>
-
+  <!-- Barra Rest -->
   <div class="rest-bar hidden" id="rest-bar">
     <div>
       <div style="font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9;">Descanso</div>
@@ -456,6 +403,7 @@
     </div>
   </div>
 
+  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <button class="nav-item active" id="tab-routine-btn" onclick="switchTab('routine')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">fitness_center</span></div>
@@ -478,18 +426,6 @@
 <script>
   let db;
   const dbReq = indexedDB.open("GymTrackerDB", 2);
-  dbReq.onupgradeneeded = (e) => {
-    db = e.target.result;
-    if (!db.objectStoreNames.contains("workouts")) {
-      const store = db.createObjectStore("workouts", { keyPath: "id", autoIncrement: true });
-      store.createIndex("date", "date", { unique: false });
-      store.createIndex("exercise", "exercise", { unique: false });
-    }
-    if (!db.objectStoreNames.contains("sessions")) {
-      const sessionStore = db.createObjectStore("sessions", { keyPath: "id", autoIncrement: true });
-      sessionStore.createIndex("date", "date", { unique: false });
-    }
-  };
   dbReq.onsuccess = (e) => {
     db = e.target.result;
     renderExercises();
@@ -504,7 +440,6 @@
     { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 75 },
     { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
     { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 2, reps: "12-15", rest_sec: 75 },
-    
     { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "6-10", rest_sec: 150 },
     { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 4, reps: "8-10", rest_sec: 150 },
     { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 90 },
@@ -512,13 +447,11 @@
     { day: "Martes", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
     { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 3, reps: "8-12", rest_sec: 90 },
     { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 75 },
-
     { day: "Miércoles", muscle: "Cuádriceps", exercise: "Sentadillas", sets: 4, reps: "8-10", rest_sec: 150 },
     { day: "Miércoles", muscle: "Femorales", exercise: "Peso muerto rumano", sets: 3, reps: "8-10", rest_sec: 150 },
     { day: "Miércoles", muscle: "Cuádriceps", exercise: "Prensa 45°", sets: 3, reps: "10-12", rest_sec: 120 },
     { day: "Miércoles", muscle: "Cuádriceps", exercise: "Banco de cuádriceps", sets: 4, reps: "8-10", rest_sec: 90 },
     { day: "Miércoles", muscle: "Gemelos", exercise: "Gemelos de pie", sets: 4, reps: "10-15", rest_sec: 90 },
-
     { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "8-12", rest_sec: 120 },
     { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 120 },
     { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-12", rest_sec: 120 },
@@ -527,7 +460,6 @@
     { day: "Jueves", muscle: "Deltoide posterior", exercise: "Reverse Pec Deck", sets: 3, reps: "15-20", rest_sec: 60 },
     { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado", sets: 3, reps: "10-15", rest_sec: 75 },
     { day: "Jueves", muscle: "Tríceps", exercise: "Tríceps cuerda", sets: 3, reps: "10-15", rest_sec: 75 },
-
     { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 120 },
     { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 },
     { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 75 },
@@ -547,31 +479,11 @@
   }
 
   let selectedDay = getTodayName();
-
-  // TIMER PERSISTENTE Y WAKE LOCK
   let workoutActive = localStorage.getItem('workout_active') === 'true';
   let workoutStartTime = parseInt(localStorage.getItem('workout_start_time')) || null;
   let workoutSeconds = 0;
   let workoutInterval = null;
-  let wakeLock = null;
 
-  async function requestWakeLock() {
-    if ('wakeLock' in navigator) {
-      try {
-        wakeLock = await navigator.wakeLock.request('screen');
-      } catch (err) {
-        console.error(`Wake Lock error: ${err.name}, ${err.message}`);
-      }
-    }
-  }
-
-  function releaseWakeLock() {
-    if (wakeLock !== null) {
-      wakeLock.release().then(() => { wakeLock = null; });
-    }
-  }
-
-  // TIMER DESCANSO Y COLOR DINÁMICO
   let restTotalDuration = 0;
   let restEndTime = null;
   let restSecondsLeft = 0;
@@ -589,18 +501,10 @@
       selectedDay = d;
       document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
       renderExercises();
     };
     daySelector.appendChild(btn);
   });
-
-  setTimeout(() => {
-    const activeBtn = document.getElementById(`day-btn-${selectedDay}`);
-    if (activeBtn) {
-      activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-    }
-  }, 100);
 
   function switchTab(tab) {
     document.getElementById('tab-routine-btn').classList.toggle('active', tab === 'routine');
@@ -621,7 +525,6 @@
     const list = document.getElementById('exercise-list');
     list.innerHTML = '';
     const exercises = DB_ROUTINE.filter(e => e.day === selectedDay);
-
     let lastMuscleGroup = "";
 
     exercises.forEach((ex, exIdx) => {
@@ -675,12 +578,9 @@
     const w = document.getElementById(`input_w_${inputIdSuffix}`).value;
     const r = document.getElementById(`input_r_${inputIdSuffix}`).value;
     const btn = document.getElementById(`btn_c_${inputIdSuffix}`);
-    
     btn.classList.toggle('done');
 
-    if (navigator.vibrate) {
-      navigator.vibrate(50);
-    }
+    if (navigator.vibrate) navigator.vibrate(50);
     
     if (w || r) {
       const today = new Date().toISOString().split('T')[0];
@@ -693,7 +593,6 @@
         reps: parseInt(r) || 0,
         timestamp: Date.now()
       };
-      
       const tx = db.transaction("workouts", "readwrite");
       tx.objectStore("workouts").add(record);
     }
@@ -706,9 +605,7 @@
   function fetchLastPerformance(exerciseName, elementId) {
     if (!db) return;
     const tx = db.transaction("workouts", "readonly");
-    const store = tx.objectStore("workouts");
-    const index = store.index("exercise");
-    const req = index.getAll(exerciseName);
+    const req = tx.objectStore("workouts").index("exercise").getAll(exerciseName);
 
     req.onsuccess = () => {
       const res = req.result;
@@ -732,6 +629,7 @@
     return `${s}s`;
   }
 
+  /* HISTORIAL REDISEÑADO CON FORMATO LIMPIO Y ORDENADO */
   function loadHistory() {
     const container = document.getElementById('history-container');
     if (!db) return;
@@ -759,7 +657,7 @@
           <div class="empty-state">
             <span class="material-symbols-outlined empty-state-icon">history</span>
             <div class="empty-state-title">Sin historial registrado</div>
-            <div class="empty-state-text">Aún no registras entrenamientos esta semana.<br>¡Haz clic en "Iniciar" arriba para empezar tu primera sesión!</div>
+            <div class="empty-state-text">Aún no registras entrenamientos.</div>
           </div>
         `;
         return;
@@ -788,14 +686,29 @@
         let exSummary = {};
         items.forEach(i => {
           if (!exSummary[i.exercise]) exSummary[i.exercise] = [];
-          exSummary[i.exercise].push(`S${i.set}: ${i.weight}kg×${i.reps}`);
+          exSummary[i.exercise].push(i);
         });
 
-        let summaryText = '';
+        let summaryHTML = '';
         for (let ex in exSummary) {
-          summaryText += `<div><strong>${ex}:</strong> ${exSummary[ex].join(', ')}</div>`;
+          // Ordenar series numéricamente (S1, S2, S3...)
+          exSummary[ex].sort((a,b) => a.set - b.set);
+          
+          let setChips = exSummary[ex].map(s => `
+            <div class="history-set-chip">
+              S${s.set}: <strong>${s.weight}kg</strong> × ${s.reps}
+            </div>
+          `).join('');
+
+          summaryHTML += `
+            <div class="history-ex-item">
+              <div class="history-ex-name">${ex}</div>
+              <div class="history-sets-flex">${setChips}</div>
+            </div>
+          `;
         }
-        if (!summaryText) summaryText = `<div style="color: #90909a; font-style: italic;">Sesión de tiempo registrada sin series guardadas.</div>`;
+
+        if (!summaryHTML) summaryHTML = `<div style="color: #90909a; font-size: 12px; font-style: italic;">Sesión sin series completadas.</div>`;
 
         const dayName = items.length > 0 ? items[0].day : '';
         const totalFormatted = totalSecs > 0 ? formatDuration(totalSecs) : '0s';
@@ -803,271 +716,31 @@
         const wrapper = document.createElement('div');
         wrapper.className = 'swipe-container';
         wrapper.innerHTML = `
-          <div class="swipe-bg">
-            <span class="material-symbols-outlined">delete</span>
-          </div>
-          <div class="swipe-content" id="card-${d}">
+          <div class="swipe-bg"><span class="material-symbols-outlined">delete</span></div>
+          <div class="swipe-content">
             <div class="history-header">
               <div class="history-date">${d}</div>
-              <div class="history-total-time">Total: ${totalFormatted}</div>
+              <div class="history-total-time">Duración: ${totalFormatted}</div>
             </div>
             ${dayName ? `<div class="history-day">${dayName}</div>` : ''}
-            <div class="history-ex-list">${summaryText}</div>
+            <div>${summaryHTML}</div>
           </div>
         `;
-
         container.appendChild(wrapper);
-
-        const cardEl = wrapper.querySelector('.swipe-content');
-        let startX = 0;
-        let currentX = 0;
-
-        cardEl.addEventListener('touchstart', (e) => {
-          startX = e.touches[0].clientX;
-        }, { passive: true });
-
-        cardEl.addEventListener('touchmove', (e) => {
-          currentX = e.touches[0].clientX;
-          const diffX = currentX - startX;
-          if (diffX < 0) {
-            cardEl.style.transform = `translateX(${diffX}px)`;
-          }
-        }, { passive: true });
-
-        cardEl.addEventListener('touchend', () => {
-          const diffX = currentX - startX;
-          if (diffX < -120) {
-            cardEl.style.transform = `translateX(-100%)`;
-            setTimeout(() => {
-              deleteDayRecords(d);
-            }, 150);
-          } else {
-            cardEl.style.transform = `translateX(0px)`;
-          }
-        });
       });
     }
   }
 
-  function deleteDayRecords(dateStr) {
-    if (!db) return;
-    const tx = db.transaction(["workouts", "sessions"], "readwrite");
-    const storeW = tx.objectStore("workouts");
-    const storeS = tx.objectStore("sessions");
-
-    const indexW = storeW.index("date");
-    const reqW = indexW.getAllKeys(dateStr);
-    reqW.onsuccess = () => {
-      reqW.result.forEach(k => storeW.delete(k));
-    };
-
-    const indexS = storeS.index("date");
-    const reqS = indexS.getAllKeys(dateStr);
-    reqS.onsuccess = () => {
-      reqS.result.forEach(k => storeS.delete(k));
-    };
-
-    tx.oncomplete = () => {
-      loadHistory();
-      renderExercises();
-    };
-  }
-
-  function populateProgressSelect() {
-    const select = document.getElementById('progress-ex-select');
-    select.innerHTML = '';
-    const uniqueExercises = Array.from(new Set(DB_ROUTINE.map(e => e.exercise))).sort();
-    
-    uniqueExercises.forEach(ex => {
-      const opt = document.createElement('option');
-      opt.value = ex;
-      opt.textContent = ex;
-      select.appendChild(opt);
-    });
-    renderExerciseProgress();
-  }
-
-  function loadProgressMetrics() {
-    if (!db) return;
-    
-    const tx = db.transaction("sessions", "readonly");
-    const req = tx.objectStore("sessions").getAll();
-
-    req.onsuccess = () => {
-      const sessions = req.result;
-      const now = Date.now();
-      const fourWeeksMs = 28 * 24 * 60 * 60 * 1000;
-      
-      const recentSessions = sessions.filter(s => (now - s.timestamp) <= fourWeeksMs);
-      const totalSecs = recentSessions.reduce((acc, s) => acc + s.durationSeconds, 0);
-      
-      const weeklyAvgSecs = Math.round(totalSecs / 4);
-      document.getElementById('weekly-avg-display').textContent = formatDuration(weeklyAvgSecs) + " / sem";
-      document.getElementById('total-time-month').textContent = `Total acumulado (28 días): ${formatDuration(totalSecs)}`;
-    };
-
-    renderExerciseProgress();
-  }
-
-  function renderExerciseProgress() {
-    const select = document.getElementById('progress-ex-select');
-    if (!select.value || !db) return;
-
-    const selectedEx = select.value;
-    const tx = db.transaction("workouts", "readonly");
-    const index = tx.objectStore("workouts").index("exercise");
-    const req = index.getAll(selectedEx);
-
-    req.onsuccess = () => {
-      const records = req.result;
-      const prDisplay = document.getElementById('pr-weight-display');
-      const list = document.getElementById('weight-history-list');
-      
-      if (!records || records.length === 0) {
-        prDisplay.textContent = "0 kg";
-        list.innerHTML = `
-          <div class="empty-state" style="padding: 24px 16px;">
-            <span class="material-symbols-outlined empty-state-icon" style="font-size: 36px;">monitoring</span>
-            <div class="empty-state-title">Sin cargas registradas</div>
-            <div class="empty-state-text">Completa series de este ejercicio para ver tu progresión de peso con el tiempo.</div>
-          </div>
-        `;
-        return;
-      }
-
-      let maxWeight = 0;
-      records.forEach(r => {
-        if (r.weight > maxWeight) maxWeight = r.weight;
-      });
-      prDisplay.textContent = `${maxWeight} kg`;
-
-      const groupedByDate = {};
-      records.forEach(r => {
-        if (!groupedByDate[r.date] || r.weight > groupedByDate[r.date]) {
-          groupedByDate[r.date] = r.weight;
-        }
-      });
-
-      const dates = Object.keys(groupedByDate).sort((a,b) => b.localeCompare(a));
-      list.innerHTML = '';
-      dates.forEach(d => {
-        const item = document.createElement('div');
-        item.className = 'weight-history-item';
-        item.innerHTML = `
-          <span style="color: #c6c5d0;">${d}</span>
-          <span style="font-weight: 700; color: #a8c7fa;">${groupedByDate[d]} kg</span>
-        `;
-        list.appendChild(item);
-      });
-    };
-  }
-
-  function addNewExercise() {
-    const name = document.getElementById('add-ex-name').value.trim();
-    const day = document.getElementById('add-ex-day').value;
-    const muscle = document.getElementById('add-ex-muscle').value.trim();
-    const sets = parseInt(document.getElementById('add-ex-sets').value) || 3;
-    const reps = document.getElementById('add-ex-reps').value.trim() || "10-12";
-    const rest_sec = parseInt(document.getElementById('add-ex-rest').value) || 90;
-
-    if (!name || !muscle) {
-      alert("Completa el nombre y el músculo.");
-      return;
-    }
-
-    const newEx = { day, muscle, exercise: name, sets, reps, rest_sec };
-    DB_ROUTINE.push(newEx);
-    localStorage.setItem('custom_routine', JSON.stringify(DB_ROUTINE));
-
-    document.getElementById('add-ex-name').value = '';
-    document.getElementById('add-ex-muscle').value = '';
-
-    alert("¡Ejercicio agregado!");
-    populateProgressSelect();
-    selectedDay = day;
-    document.querySelectorAll('.day-btn').forEach(b => {
-      b.classList.toggle('active', b.textContent === day);
-    });
-    switchTab('routine');
-    renderExercises();
-  }
-
-  // ENTRENAMIENTO PRINCIPAL
-  const btnWorkout = document.getElementById('btn-toggle-workout');
-
-  if (workoutActive && workoutStartTime) {
-    resumeWorkoutTimer();
-  }
-
-  btnWorkout.onclick = () => {
-    workoutActive = !workoutActive;
-    
-    if (workoutActive) {
-      workoutStartTime = Date.now();
-      localStorage.setItem('workout_active', 'true');
-      localStorage.setItem('workout_start_time', workoutStartTime);
-      resumeWorkoutTimer();
-    } else {
-      if (confirm("¿Deseas finalizar la sesión de entrenamiento y guardar el tiempo?")) {
-        stopAndSaveWorkout();
-      } else {
-        workoutActive = true;
-      }
-    }
-  };
-
-  function resumeWorkoutTimer() {
-    btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">stop</span> Finalizar`;
-    btnWorkout.classList.add('active');
-    requestWakeLock();
-    updateWorkoutTimerDisplay();
-    clearInterval(workoutInterval);
-    workoutInterval = setInterval(updateWorkoutTimerDisplay, 1000);
-  }
-
-  function stopAndSaveWorkout() {
-    btnWorkout.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span> Iniciar`;
-    btnWorkout.classList.remove('active');
-    releaseWakeLock();
-    clearInterval(workoutInterval);
-    stopRestTimer();
-
-    if (workoutSeconds > 0 && db) {
-      const today = new Date().toISOString().split('T')[0];
-      const tx = db.transaction("sessions", "readwrite");
-      tx.objectStore("sessions").add({
-        date: today,
-        durationSeconds: workoutSeconds,
-        timestamp: Date.now()
-      });
-    }
-
-    workoutActive = false;
-    workoutSeconds = 0;
-    workoutStartTime = null;
-    localStorage.removeItem('workout_active');
-    localStorage.removeItem('workout_start_time');
-    document.getElementById('workout-timer').textContent = "00:00:00";
-  }
-
-  function updateWorkoutTimerDisplay() {
-    if (!workoutStartTime) return;
-    workoutSeconds = Math.floor((Date.now() - workoutStartTime) / 1000);
-    const h = String(Math.floor(workoutSeconds / 3600)).padStart(2, '0');
-    const m = String(Math.floor((workoutSeconds % 3600) / 60)).padStart(2, '0');
-    const s = String(workoutSeconds % 60).padStart(2, '0');
-    document.getElementById('workout-timer').textContent = `${h}:${m}:${s}`;
-  }
-
-  // TIMER DE DESCANSO CON TRANSICIÓN DE COLOR VERDE -> ROJO
   function startRestTimer(seconds) {
     clearInterval(restInterval);
     restTotalDuration = seconds;
     restEndTime = Date.now() + (seconds * 1000);
+    
     const bar = document.getElementById('rest-bar');
     bar.classList.remove('hidden');
+    document.body.classList.add('rest-active'); // Aumenta margen inferior para no tapar contenido
+    
     updateRestDisplay();
-
     restInterval = setInterval(updateRestDisplay, 1000);
   }
 
@@ -1077,6 +750,7 @@
     restSecondsLeft = 0;
     restTotalDuration = 0;
     document.getElementById('rest-bar').classList.add('hidden');
+    document.body.classList.remove('rest-active'); // Restaura margen inferior
   }
 
   function updateRestDisplay() {
@@ -1091,7 +765,6 @@
       const s = String(restSecondsLeft % 60).padStart(2, '0');
       document.getElementById('rest-timer').textContent = `${m}:${s}`;
 
-      // Cálculo del matiz HSL: 120 es verde puro (inicio), 0 es rojo puro (final)
       const ratio = Math.max(0, Math.min(1, restSecondsLeft / restTotalDuration));
       const hue = Math.round(ratio * 120); 
 
@@ -1099,64 +772,6 @@
       bar.style.background = `linear-gradient(135deg, hsl(${hue}, 75%, 35%) 0%, hsl(${hue}, 85%, 20%) 100%)`;
     }
   }
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      if (workoutActive) {
-        requestWakeLock();
-        updateWorkoutTimerDisplay();
-      }
-      if (restEndTime) updateRestDisplay();
-    }
-  });
-
-  window.addEventListener('load', () => {
-    history.pushState({ page: 'main' }, '', '');
-  });
-
-  window.addEventListener('popstate', (e) => {
-    if (workoutActive) {
-      history.pushState({ page: 'main' }, '', '');
-      if (confirm("Tienes un entrenamiento en curso. ¿Seguro que deseas salir y finalizarlo?")) {
-        stopAndSaveWorkout();
-        history.back();
-      }
-    } else {
-      const activeTabBtn = document.querySelector('.nav-item.active');
-      if (activeTabBtn && activeTabBtn.id !== 'tab-routine-btn') {
-        history.pushState({ page: 'main' }, '', '');
-        switchTab('routine');
-      }
-    }
-  });
-
-  window.addEventListener('beforeunload', (e) => {
-    if (workoutActive) {
-      e.preventDefault();
-      e.returnValue = '';
-    }
-  });
-
-  let touchStartY = 0;
-  window.addEventListener('touchstart', (e) => {
-    touchStartY = e.touches[0].clientY;
-  }, { passive: false });
-
-  window.addEventListener('touchmove', (e) => {
-    const touchY = e.touches[0].clientY;
-    const touchDiff = touchY - touchStartY;
-    if (window.scrollY === 0 && touchDiff > 0) {
-      e.preventDefault();
-    }
-  }, { passive: false });
-
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab');
-    if (tab === 'history') switchTab('history');
-    else if (tab === 'progress') switchTab('progress');
-    else if (tab === 'routine') switchTab('routine');
-  });
 
   document.getElementById('btn-add-30').onclick = () => { 
     if (restEndTime) {
@@ -1166,54 +781,6 @@
     }
   };
   document.getElementById('btn-skip-rest').onclick = () => { stopRestTimer(); };
-
-  // SERVICE WORKER & UPDATE BANNER
-  if ('serviceWorker' in navigator) {
-    let refreshing = false;
-
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!refreshing) {
-        refreshing = true;
-        window.location.reload();
-      }
-    });
-
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js').then(registration => {
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') {
-            registration.update();
-          }
-        });
-
-        if (registration.waiting) {
-          showUpdateBanner(registration.waiting);
-        }
-
-        registration.addEventListener('updatefound', () => {
-          const newWorker = registration.installing;
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-              showUpdateBanner(newWorker);
-            }
-          });
-        });
-      });
-    });
-
-    function showUpdateBanner(worker) {
-      const banner = document.getElementById('update-banner');
-      const btn = document.getElementById('btn-reload-app');
-      
-      if (banner && btn) {
-        banner.classList.remove('hidden');
-        btn.onclick = () => {
-          worker.postMessage({ action: 'skipWaiting' });
-        };
-      }
-    }
-  }
 </script>
 </body>
 </html>
