@@ -31,7 +31,7 @@
       padding-bottom: 160px;
     }
 
-    /* Top Bar Sticky */
+    /* Header Sticky */
     header {
       position: sticky;
       top: 0;
@@ -129,7 +129,7 @@
       border-color: #a8c7fa;
     }
 
-    /* Muscle Headers */
+    /* Headers de grupos musculares */
     .muscle-group-header {
       display: flex;
       align-items: center;
@@ -149,7 +149,7 @@
     }
     .muscle-group-line { flex: 1; height: 1px; background: #2b2b32; }
 
-    /* Cards */
+    /* Tarjetas de Ejercicios */
     .card {
       background: #1b1b21;
       border-radius: 16px;
@@ -215,7 +215,7 @@
     }
     .btn-check.done { background: #386a20; color: #b5f296; }
 
-    /* Historial + Gestos de Descarte */
+    /* Historial */
     .swipe-container { position: relative; overflow: hidden; border-radius: 16px; margin-bottom: 12px; }
     .swipe-bg {
       position: absolute; top: 0; right: 0; bottom: 0; left: 0;
@@ -284,7 +284,48 @@
       backdrop-filter: blur(4px);
     }
 
-    .form-group { margin-bottom: 12px; }
+    /* Modal Resumen */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.hidden { display: none; }
+    .modal-card {
+      background: #1b1b21;
+      border: 1px solid #45464f;
+      border-radius: 20px;
+      padding: 24px;
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.8);
+    }
+    .modal-icon { font-size: 48px; color: #a8c7fa; margin-bottom: 8px; }
+    .modal-title { font-size: 20px; font-weight: 700; color: #e2e2e9; margin-bottom: 4px; }
+    .modal-subtitle { font-size: 13px; color: #90909a; margin-bottom: 20px; }
+    .modal-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-box {
+      background: #121318;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #2b2b32;
+    }
+    .stat-val { font-size: 20px; font-weight: 700; color: #c2e7ff; }
+    .stat-lbl { font-size: 11px; color: #90909a; text-transform: uppercase; margin-top: 2px; font-weight: 500; }
+
+    .form-group { margin-bottom: 12px; text-align: left; }
     .form-group label { display: block; font-size: 11px; font-weight: 700; color: #90909a; margin-bottom: 4px; text-transform: uppercase; }
     .form-control {
       width: 100%; background: #121318; border: 1px solid #45464f; color: #fff; padding: 10px; border-radius: 8px; font-family: inherit; font-size: 14px; outline: none;
@@ -307,23 +348,38 @@
       <div class="timer-display" id="workout-timer">00:00:00</div>
     </div>
     <button class="btn-workout" id="btn-toggle-workout">
-      <span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
-      Iniciar
+      <span class="material-symbols-outlined" id="workout-btn-icon" style="font-size: 18px;">play_arrow</span>
+      <span id="workout-btn-text">Iniciar</span>
     </button>
   </header>
 
-  <!-- Vista Rutina -->
   <div id="view-routine">
     <div class="day-selector" id="day-selector"></div>
     <div id="exercise-list"></div>
   </div>
 
-  <!-- Vista Historial -->
   <div id="view-history" class="hidden-view">
     <div id="history-container"></div>
   </div>
 
-  <!-- Vista Agregar Ejercicio -->
+  <div id="view-progress" class="hidden-view">
+    <div class="card">
+      <div class="exercise-title" style="margin-bottom: 6px;">Progreso de cargas</div>
+      <div class="exercise-subtitle">Selecciona un ejercicio para ver tus avances</div>
+      <div class="form-group" style="margin-top: 14px;">
+        <label>Ejercicio</label>
+        <select id="progress-ex-select" class="form-control" onchange="renderProgressChart()">
+          <option value="">Cargando ejercicios...</option>
+        </select>
+      </div>
+      <div id="progress-chart-container" style="margin-top: 16px;">
+        <div style="text-align: center; color: #90909a; font-size: 13px; padding: 20px 0;">
+          Selecciona un ejercicio para consultar el progreso.
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="view-add" class="hidden-view">
     <div class="card">
       <div class="exercise-title" style="margin-bottom: 12px;">Nuevo Ejercicio</div>
@@ -361,7 +417,6 @@
     </div>
   </div>
 
-  <!-- Barra Rest -->
   <div class="rest-bar hidden" id="rest-bar">
     <div>
       <div style="font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9;">Descanso</div>
@@ -373,7 +428,31 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
+  <div class="modal-overlay hidden" id="summary-modal">
+    <div class="modal-card">
+      <span class="material-symbols-outlined modal-icon">emoji_events</span>
+      <div class="modal-title">¡Entrenamiento Finalizado!</div>
+      <div class="modal-subtitle" id="summary-date-day">Día de entrenamiento</div>
+      
+      <div class="modal-stats-grid">
+        <div class="stat-box">
+          <div class="stat-val" id="summary-time">00:00</div>
+          <div class="stat-lbl">Tiempo Total</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-val" id="summary-exercises">0</div>
+          <div class="stat-lbl">Ejercicios</div>
+        </div>
+        <div class="stat-box" style="grid-column: span 2;">
+          <div class="stat-val" id="summary-sets">0</div>
+          <div class="stat-lbl">Series Completadas</div>
+        </div>
+      </div>
+
+      <button class="btn-submit" onclick="closeSummaryModal()">Aceptar</button>
+    </div>
+  </div>
+
   <nav class="bottom-nav">
     <button class="nav-item active" id="tab-routine-btn" onclick="switchTab('routine')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">fitness_center</span></div>
@@ -382,6 +461,10 @@
     <button class="nav-item" id="tab-history-btn" onclick="switchTab('history')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">history</span></div>
       <span>Historial</span>
+    </button>
+    <button class="nav-item" id="tab-progress-btn" onclick="switchTab('progress')">
+      <div class="nav-icon-wrapper"><span class="material-symbols-outlined">monitoring</span></div>
+      <span>Progreso</span>
     </button>
     <button class="nav-item" id="tab-add-btn" onclick="switchTab('add')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">add_circle</span></div>
@@ -392,16 +475,72 @@
 <script>
   let db;
   const dbReq = indexedDB.open("GymTrackerDB", 2);
+  
+  dbReq.onupgradeneeded = (e) => {
+    const dbInst = e.target.result;
+    if (!dbInst.objectStoreNames.contains("workouts")) {
+      const storeW = dbInst.createObjectStore("workouts", { keyPath: "id", autoIncrement: true });
+      storeW.createIndex("exercise", "exercise", { unique: false });
+      storeW.createIndex("date", "date", { unique: false });
+    }
+    if (!dbInst.objectStoreNames.contains("sessions")) {
+      const storeS = dbInst.createObjectStore("sessions", { keyPath: "id", autoIncrement: true });
+      storeS.createIndex("date", "date", { unique: false });
+    }
+  };
+
   dbReq.onsuccess = (e) => {
     db = e.target.result;
     renderExercises();
+    populateProgressSelect();
   };
 
+  // Rutina Completa Restaurada
   const DEFAULT_ROUTINE = [
+    // LUNES: PECHO / TRÍCEPS
     { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 150 },
     { day: "Lunes", muscle: "Pecho", exercise: "Press inclinado con mancuernas", sets: 3, reps: "8-10", rest_sec: 120 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón", sets: 3, reps: "8-10", rest_sec: 120 },
-    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 }
+    { day: "Lunes", muscle: "Pecho", exercise: "Press convergente en máquina", sets: 3, reps: "10-12", rest_sec: 120 },
+    { day: "Lunes", muscle: "Pecho", exercise: "Aperturas en polea", sets: 2, reps: "12-15", rest_sec: 120 },
+    { day: "Lunes", muscle: "Deltoide lateral", exercise: "Elevación lateral unilateral en polea", sets: 4, reps: "12-18", rest_sec: 180 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión de tríceps con cuerda", sets: 3, reps: "10-15", rest_sec: 120 },
+    { day: "Lunes", muscle: "Tríceps", exercise: "Extensión por encima de la cabeza con cuerda", sets: 3, reps: "12-15", rest_sec: 120 },
+
+    // MARTES: ESPALDA / BÍCEPS
+    { day: "Martes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "8-10", rest_sec: 180 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo T-Bar con apoyo de pecho", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Martes", muscle: "Espalda", exercise: "Jalón unilateral", sets: 3, reps: "10-12", rest_sec: 180 },
+    { day: "Martes", muscle: "Espalda", exercise: "Remo Hammer con apoyo", sets: 3, reps: "10-12", rest_sec: 180 },
+    { day: "Martes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 4, reps: "15-20", rest_sec: 120 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl con barra EZ", sets: 4, reps: "8-10", rest_sec: 180 },
+    { day: "Martes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "10-15", rest_sec: 90 },
+
+    // MIÉRCOLES: PIERNAS
+    { day: "Miércoles", muscle: "Piernas", exercise: "Sentadillas libres", sets: 4, reps: "6-8", rest_sec: 180 },
+    { day: "Miércoles", muscle: "Piernas", exercise: "Peso muerto rumano", sets: 4, reps: "6-8", rest_sec: 180 },
+    { day: "Miércoles", muscle: "Piernas", exercise: "Prensa 45°", sets: 4, reps: "6-8", rest_sec: 180 },
+    { day: "Miércoles", muscle: "Piernas", exercise: "Banco de cuadríceps", sets: 4, reps: "10-12", rest_sec: 180 },
+    { day: "Miércoles", muscle: "Piernas", exercise: "Gemelos", sets: 4, reps: "12-15", rest_sec: 120 },
+
+    // JUEVES: PECHO / ESPALDA / TRÍCEPS
+    { day: "Jueves", muscle: "Pecho", exercise: "Press inclinado en máquina", sets: 3, reps: "6-8", rest_sec: 180 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Jalón neutro", sets: 3, reps: "8-12", rest_sec: 180 },
+    { day: "Jueves", muscle: "Pecho", exercise: "Press banca con mancuernas", sets: 3, reps: "8-10", rest_sec: 180 },
+    { day: "Jueves", muscle: "Espalda", exercise: "Remo sentado en polea", sets: 3, reps: "10-12", rest_sec: 180 },
+    { day: "Jueves", muscle: "Deltoide lateral", exercise: "Elevaciones laterales con mancuernas", sets: 4, reps: "15-25", rest_sec: 180 },
+    { day: "Jueves", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 120 },
+    { day: "Jueves", muscle: "Bíceps", exercise: "Curl inclinado con mancuernas", sets: 3, reps: "10-15", rest_sec: 180 },
+    { day: "Jueves", muscle: "Tríceps", exercise: "Extensión en polea alta", sets: 3, reps: "10-12", rest_sec: 90 },
+
+    // VIERNES: ESPALDA / PECHO / BÍCEPS
+    { day: "Viernes", muscle: "Espalda", exercise: "Dominadas / Jalón al pecho", sets: 4, reps: "8-10", rest_sec: 180 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Remo pecho apoyado", sets: 3, reps: "8-12", rest_sec: 120 },
+    { day: "Viernes", muscle: "Espalda", exercise: "Pullover en polea", sets: 3, reps: "12-15", rest_sec: 90 },
+    { day: "Viernes", muscle: "Hombros", exercise: "Elevación lateral en máquina", sets: 4, reps: "12-15", rest_sec: 90 },
+    { day: "Viernes", muscle: "Deltoide posterior", exercise: "Face Pull", sets: 3, reps: "15-20", rest_sec: 120 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl Bayesian", sets: 4, reps: "12-15", rest_sec: 180 },
+    { day: "Viernes", muscle: "Bíceps", exercise: "Curl martillo", sets: 3, reps: "12-15", rest_sec: 90 },
+    { day: "Viernes", muscle: "Tríceps", exercise: "Extensión unilateral de tríceps", sets: 3, reps: "10-15", rest_sec: 120 }
   ];
 
   let DB_ROUTINE = JSON.parse(localStorage.getItem('custom_routine')) || DEFAULT_ROUTINE;
@@ -417,6 +556,12 @@
   let restEndTime = null;
   let restSecondsLeft = 0;
   let restInterval = null;
+
+  // Variables Cronómetro Principal
+  let workoutStartTime = null;
+  let workoutTimerInterval = null;
+  let workoutElapsedSeconds = 0;
+  let isWorkoutActive = false;
 
   const days = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
   const daySelector = document.getElementById('day-selector');
@@ -435,22 +580,124 @@
     daySelector.appendChild(btn);
   });
 
+  // Cronómetro de entrenamiento
+  const btnToggleWorkout = document.getElementById('btn-toggle-workout');
+  btnToggleWorkout.onclick = () => {
+    if (!isWorkoutActive) {
+      startWorkout();
+    } else {
+      stopWorkout();
+    }
+  };
+
+  function startWorkout() {
+    isWorkoutActive = true;
+    workoutStartTime = Date.now() - (workoutElapsedSeconds * 1000);
+    
+    document.getElementById('workout-btn-text').textContent = 'Finalizar';
+    document.getElementById('workout-btn-icon').textContent = 'stop';
+    btnToggleWorkout.classList.add('active');
+
+    workoutTimerInterval = setInterval(() => {
+      workoutElapsedSeconds = Math.floor((Date.now() - workoutStartTime) / 1000);
+      updateWorkoutTimerDisplay();
+    }, 1000);
+  }
+
+  function stopWorkout() {
+    clearInterval(workoutTimerInterval);
+    isWorkoutActive = false;
+
+    const totalDuration = workoutElapsedSeconds;
+
+    document.getElementById('workout-btn-text').textContent = 'Iniciar';
+    document.getElementById('workout-btn-icon').textContent = 'play_arrow';
+    btnToggleWorkout.classList.remove('active');
+
+    const today = new Date().toISOString().split('T')[0];
+
+    // Guardar sesión en IndexedDB
+    if (totalDuration > 0 && db) {
+      const tx = db.transaction("sessions", "readwrite");
+      tx.objectStore("sessions").add({
+        date: today,
+        day: selectedDay,
+        durationSeconds: totalDuration,
+        timestamp: Date.now()
+      });
+    }
+
+    // Modal de resumen
+    showWorkoutSummary(totalDuration, today);
+
+    // Reset timer
+    workoutElapsedSeconds = 0;
+    updateWorkoutTimerDisplay();
+  }
+
+  function updateWorkoutTimerDisplay() {
+    const h = String(Math.floor(workoutElapsedSeconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((workoutElapsedSeconds % 3600) / 60)).padStart(2, '0');
+    const s = String(workoutElapsedSeconds % 60).padStart(2, '0');
+    document.getElementById('workout-timer').textContent = `${h}:${m}:${s}`;
+  }
+
+  function showWorkoutSummary(totalSeconds, todayDate) {
+    if (!db) return;
+    const tx = db.transaction("workouts", "readonly");
+    const req = tx.objectStore("workouts").index("date").getAll(todayDate);
+
+    req.onsuccess = () => {
+      const setsDone = req.result || [];
+      const totalSets = setsDone.length;
+      
+      const uniqueExercises = new Set(setsDone.map(s => s.exercise));
+      const totalExercises = uniqueExercises.size;
+
+      document.getElementById('summary-date-day').textContent = `${selectedDay} • ${todayDate}`;
+      document.getElementById('summary-time').textContent = formatDuration(totalSeconds);
+      document.getElementById('summary-exercises').textContent = totalExercises;
+      document.getElementById('summary-sets').textContent = totalSets;
+
+      document.getElementById('summary-modal').classList.remove('hidden');
+    };
+  }
+
+  function closeSummaryModal() {
+    document.getElementById('summary-modal').classList.add('hidden');
+  }
+
   function switchTab(tab) {
     document.getElementById('tab-routine-btn').classList.toggle('active', tab === 'routine');
     document.getElementById('tab-history-btn').classList.toggle('active', tab === 'history');
+    document.getElementById('tab-progress-btn').classList.toggle('active', tab === 'progress');
     document.getElementById('tab-add-btn').classList.toggle('active', tab === 'add');
     
     document.getElementById('view-routine').classList.toggle('hidden-view', tab !== 'routine');
     document.getElementById('view-history').classList.toggle('hidden-view', tab !== 'history');
+    document.getElementById('view-progress').classList.toggle('hidden-view', tab !== 'progress');
     document.getElementById('view-add').classList.toggle('hidden-view', tab !== 'add');
 
     if (tab === 'history') loadHistory();
+    if (tab === 'progress') populateProgressSelect();
   }
 
   function renderExercises() {
     const list = document.getElementById('exercise-list');
     list.innerHTML = '';
     const exercises = DB_ROUTINE.filter(e => e.day === selectedDay);
+    
+    if (exercises.length === 0) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <span class="material-symbols-outlined empty-state-icon">fitness_center</span>
+          <div class="empty-state-title">Sin ejercicios asignados</div>
+          <div class="empty-state-text">No hay rutina cargada para el día ${selectedDay}.</div>
+        </div>
+      `;
+      return;
+    }
+
     let lastMuscleGroup = "";
 
     exercises.forEach((ex, exIdx) => {
@@ -546,6 +793,33 @@
     };
   }
 
+  function addNewExercise() {
+    const name = document.getElementById('add-ex-name').value.trim();
+    const day = document.getElementById('add-ex-day').value;
+    const muscle = document.getElementById('add-ex-muscle').value.trim() || 'General';
+    const sets = parseInt(document.getElementById('add-ex-sets').value) || 3;
+    const reps = document.getElementById('add-ex-reps').value.trim() || '10';
+    const rest_sec = parseInt(document.getElementById('add-ex-rest').value) || 90;
+
+    if (!name) {
+      alert('Ingresa el nombre del ejercicio');
+      return;
+    }
+
+    const newEx = { day, muscle, exercise: name, sets, reps, rest_sec };
+    DB_ROUTINE.push(newEx);
+    localStorage.setItem('custom_routine', JSON.stringify(DB_ROUTINE));
+
+    document.getElementById('add-ex-name').value = '';
+    alert('Ejercicio añadido correctamente');
+    switchTab('routine');
+    selectedDay = day;
+    document.querySelectorAll('.day-btn').forEach(b => {
+      b.classList.toggle('active', b.textContent === day);
+    });
+    renderExercises();
+  }
+
   function formatDuration(totalSeconds) {
     const h = Math.floor(totalSeconds / 3600);
     const m = Math.floor((totalSeconds % 3600) / 60);
@@ -555,7 +829,6 @@
     return `${s}s`;
   }
 
-  /* ELIMINAR REGISTROS DE LA BASE DE DATOS */
   function deleteHistoryRecord(dateToDelete) {
     if (!confirm(`¿Eliminar el historial del ${dateToDelete}?`)) return;
 
@@ -563,7 +836,6 @@
     const workoutsStore = tx.objectStore("workouts");
     const sessionsStore = tx.objectStore("sessions");
 
-    // Borrar series del día
     const reqW = workoutsStore.openCursor();
     reqW.onsuccess = (e) => {
       const cursor = e.target.result;
@@ -575,7 +847,6 @@
       }
     };
 
-    // Borrar sesión del día
     const reqS = sessionsStore.openCursor();
     reqS.onsuccess = (e) => {
       const cursor = e.target.result;
@@ -592,7 +863,6 @@
     };
   }
 
-  /* HISTORIAL REDISEÑADO + SWIPE TO DELETE */
   function loadHistory() {
     const container = document.getElementById('history-container');
     if (!db) return;
@@ -692,7 +962,6 @@
         `;
         container.appendChild(wrapper);
 
-        // Lógica Touch / Swipe
         const swipeContent = wrapper.querySelector('.swipe-content');
         let startX = 0;
         let currentX = 0;
@@ -719,6 +988,70 @@
         });
       });
     }
+  }
+
+  function populateProgressSelect() {
+    const select = document.getElementById('progress-ex-select');
+    if (!db) return;
+    
+    const tx = db.transaction("workouts", "readonly");
+    const req = tx.objectStore("workouts").getAll();
+
+    req.onsuccess = () => {
+      const all = req.result || [];
+      const setEx = new Set(all.map(w => w.exercise));
+      DB_ROUTINE.forEach(r => setEx.add(r.exercise));
+
+      select.innerHTML = '<option value="">-- Selecciona un ejercicio --</option>';
+      Array.from(setEx).sort().forEach(ex => {
+        const opt = document.createElement('option');
+        opt.value = ex;
+        opt.textContent = ex;
+        select.appendChild(opt);
+      });
+    };
+  }
+
+  function renderProgressChart() {
+    const exName = document.getElementById('progress-ex-select').value;
+    const container = document.getElementById('progress-chart-container');
+    if (!exName || !db) {
+      container.innerHTML = '<div style="text-align: center; color: #90909a; font-size: 13px; padding: 20px 0;">Selecciona un ejercicio para consultar el progreso.</div>';
+      return;
+    }
+
+    const tx = db.transaction("workouts", "readonly");
+    const req = tx.objectStore("workouts").index("exercise").getAll(exName);
+
+    req.onsuccess = () => {
+      const records = req.result || [];
+      if (records.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: #90909a; font-size: 13px; padding: 20px 0;">No hay registros grabados para "${exName}".</div>`;
+        return;
+      }
+
+      // Agrupar por fecha obteniendo el peso máximo
+      const byDate = {};
+      records.forEach(r => {
+        if (!byDate[r.date] || r.weight > byDate[r.date].weight) {
+          byDate[r.date] = r;
+        }
+      });
+
+      const sortedDates = Object.keys(byDate).sort();
+      let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+      sortedDates.forEach(date => {
+        const r = byDate[date];
+        html += `
+          <div style="background: #121318; padding: 10px 14px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #2b2b32;">
+            <span style="font-size: 13px; color: #90909a;">${date}</span>
+            <span style="font-size: 14px; font-weight: 700; color: #a8c7fa;">${r.weight} kg × ${r.reps} reps</span>
+          </div>
+        `;
+      });
+      html += '</div>';
+      container.innerHTML = html;
+    };
   }
 
   function startRestTimer(seconds) {
