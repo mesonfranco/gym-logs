@@ -201,6 +201,11 @@
       outline: none;
     }
     .input-field:focus { border-color: #a8c7fa; }
+    .input-field:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      border-color: #2b2b32;
+    }
     .btn-check {
       background: #2b2b32;
       border: none;
@@ -212,6 +217,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+    .btn-check:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
     }
     .btn-check.done { background: #386a20; color: #b5f296; }
 
@@ -488,7 +497,7 @@
   <nav class="bottom-nav">
     <button class="nav-item active" id="tab-routine-btn" onclick="switchTab('routine')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">fitness_center</span></div>
-      <span>Rutina</span>
+      <span>Workout</span>
     </button>
     <button class="nav-item" id="tab-history-btn" onclick="switchTab('history')">
       <div class="nav-icon-wrapper"><span class="material-symbols-outlined">history</span></div>
@@ -527,7 +536,6 @@
     populateProgressSelect();
   };
 
-  // Rutina Completa Restaurada
   const DEFAULT_ROUTINE = [
     // LUNES: PECHO / TRÍCEPS
     { day: "Lunes", muscle: "Pecho", exercise: "Press banca con barra", sets: 4, reps: "6-8", rest_sec: 150 },
@@ -634,6 +642,8 @@
       workoutElapsedSeconds = Math.floor((Date.now() - workoutStartTime) / 1000);
       updateWorkoutTimerDisplay();
     }, 1000);
+
+    renderExercises();
   }
 
   function stopWorkout() {
@@ -665,6 +675,8 @@
     // Reset timer
     workoutElapsedSeconds = 0;
     updateWorkoutTimerDisplay();
+
+    renderExercises();
   }
 
   function updateWorkoutTimerDisplay() {
@@ -675,24 +687,25 @@
   }
 
   function showWorkoutSummary(totalSeconds, todayDate) {
-    if (!db) return;
-    const tx = db.transaction("workouts", "readonly");
-    const req = tx.objectStore("workouts").index("date").getAll(todayDate);
+    const exercisesForDay = DB_ROUTINE.filter(e => e.day === selectedDay);
+    
+    // Contar series completadas durante el entrenamiento actual (marcadas con 'done')
+    const completedButtons = document.querySelectorAll('.btn-check.done');
+    let totalSets = completedButtons.length;
 
-    req.onsuccess = () => {
-      const setsDone = req.result || [];
-      const totalSets = setsDone.length;
-      
-      const uniqueExercises = new Set(setsDone.map(s => s.exercise));
-      const totalExercises = uniqueExercises.size;
+    // Si no se marcó ninguna serie manualmente, tomamos las series teóricas planeadas para ese día
+    if (totalSets === 0) {
+      totalSets = exercisesForDay.reduce((acc, ex) => acc + ex.sets, 0);
+    }
 
-      document.getElementById('summary-date-day').textContent = `${selectedDay} • ${todayDate}`;
-      document.getElementById('summary-time').textContent = formatDuration(totalSeconds);
-      document.getElementById('summary-exercises').textContent = totalExercises;
-      document.getElementById('summary-sets').textContent = totalSets;
+    const totalExercises = exercisesForDay.length;
 
-      document.getElementById('summary-modal').classList.remove('hidden');
-    };
+    document.getElementById('summary-date-day').textContent = `${selectedDay} • ${todayDate}`;
+    document.getElementById('summary-time').textContent = formatDuration(totalSeconds);
+    document.getElementById('summary-exercises').textContent = totalExercises;
+    document.getElementById('summary-sets').textContent = totalSets;
+
+    document.getElementById('summary-modal').classList.remove('hidden');
   }
 
   function closeSummaryModal() {
@@ -756,12 +769,13 @@
         </div>
       `;
       for (let i = 1; i <= ex.sets; i++) {
+        const disabledAttr = isWorkoutActive ? '' : 'disabled';
         setsHTML += `
           <div class="set-row">
             <span class="set-num">${i}</span>
-            <input type="number" step="0.5" placeholder="kg" class="input-field" id="input_w_${exIdx}_${i}">
-            <input type="number" placeholder="${ex.reps}" class="input-field" id="input_r_${exIdx}_${i}">
-            <button class="btn-check" id="btn_c_${exIdx}_${i}" onclick="saveSetRecord('${ex.exercise}', ${i}, '${exIdx}_${i}', ${ex.rest_sec})">✓</button>
+            <input type="number" step="0.5" placeholder="kg" class="input-field" id="input_w_${exIdx}_${i}" ${disabledAttr}>
+            <input type="number" placeholder="${ex.reps}" class="input-field" id="input_r_${exIdx}_${i}" ${disabledAttr}>
+            <button class="btn-check" id="btn_c_${exIdx}_${i}" onclick="saveSetRecord('${ex.exercise}', ${i}, '${exIdx}_${i}', ${ex.rest_sec})" ${disabledAttr}>✓</button>
           </div>
         `;
       }
@@ -780,6 +794,8 @@
   }
 
   function saveSetRecord(exerciseName, setNum, inputIdSuffix, restSec) {
+    if (!isWorkoutActive) return;
+
     const w = document.getElementById(`input_w_${inputIdSuffix}`).value;
     const r = document.getElementById(`input_r_${inputIdSuffix}`).value;
     const btn = document.getElementById(`btn_c_${inputIdSuffix}`);
@@ -1062,7 +1078,6 @@
         return;
       }
 
-      // Agrupar por fecha obteniendo el peso máximo
       const byDate = {};
       records.forEach(r => {
         if (!byDate[r.date] || r.weight > byDate[r.date].weight) {
